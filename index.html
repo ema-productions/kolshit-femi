@@ -1,0 +1,2091 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>קולשיט</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #17191d;
+    --paper-raised: #1e2126;
+    --paper-sunk: #121417;
+    --ink: #eceae4;
+    --ink-dim: #9a9d9c;
+    --line: #33363b;
+    --accent: #f2c230;
+    --accent-ink: #1a1400;
+    --danger: #e3583f;
+    --ext: #e8a33d;
+    --ext-ink: #1a1200;
+    --int: #d4574a;
+    --int-ink: #2a0a06;
+    --break-bg: #4a2426;
+    --break-ink: #f3c9c4;
+    --radius: 3px;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'Heebo', system-ui, sans-serif;
+  }
+  :root:not([data-theme="light"]) { color-scheme: dark; }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --paper: #f3f1ea; --paper-raised: #ffffff; --paper-sunk: #ece9e0;
+      --ink: #1a1a17; --ink-dim: #6b6b63; --line: #d8d4c8; --accent-ink: #1a1400;
+      --break-bg: #f6d9d5; --break-ink: #7a231a;
+    }
+  }
+  :root[data-theme="light"] {
+    --paper: #f3f1ea; --paper-raised: #ffffff; --paper-sunk: #ece9e0;
+    --ink: #1a1a17; --ink-dim: #6b6b63; --line: #d8d4c8; --accent-ink: #1a1400;
+    --break-bg: #f6d9d5; --break-ink: #7a231a;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); padding: 28px 16px 130px; min-height: 100vh; }
+  /* every card (credits, cast, day info, schedule...) lives inside .wrap, so
+     widening it here widens all of them together, at the same width */
+  .wrap { max-width: min(94vw, 1760px); margin: 0 auto; }
+
+  /* the schedule table used to break out of .wrap on its own; now .wrap
+     itself is wide enough for every card (see .wrap above), so the schedule
+     card just needs to fill it like any other card — no separate rule needed */
+
+  .hazard {
+    height: 8px;
+    background: repeating-linear-gradient(-45deg, var(--accent), var(--accent) 14px, var(--paper) 14px, var(--paper) 28px);
+    border-radius: 2px; margin-bottom: 18px; opacity: .9;
+  }
+
+  header.top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .slate { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--ink-dim); }
+  .title-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: clamp(26px, 4.5vw, 38px); font-weight: 900; margin: 2px 0 0; letter-spacing: -0.01em; }
+  input.title-input {
+    font-size: clamp(22px, 4vw, 32px); font-weight: 900; background: transparent; border: none;
+    border-bottom: 2px solid var(--line); color: var(--ink); font-family: var(--sans); padding: 2px 2px 6px; min-width: 240px;
+  }
+  input.title-input:focus { outline: none; border-bottom-color: var(--accent); }
+  input.company-input {
+    font-family: var(--mono); font-size: 12px; background: transparent; border: none; border-bottom: 1px solid var(--line);
+    color: var(--ink-dim); padding: 2px; width: 200px;
+  }
+  input.company-input:focus { outline: none; border-bottom-color: var(--accent); }
+
+  .sync-badge { font-family: var(--mono); font-size: 11.5px; padding: 6px 12px; border-radius: 20px; white-space: nowrap; align-self: flex-start; }
+  .sync-badge.sync-shared { background: rgba(88,166,255,0.15); color: #6cb4ff; border: 1px solid rgba(108,180,255,0.4); }
+  .sync-badge.sync-local { background: rgba(242,194,48,0.12); color: var(--accent); border: 1px solid rgba(242,194,48,0.35); }
+
+  section.card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 6px; padding: 18px 18px 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 13px; font-weight: 700; margin: 0 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .card h2 .hint { font-weight: 400; color: var(--ink-dim); font-size: 12px; }
+
+  label { display: block; font-size: 11.5px; color: var(--ink-dim); margin-bottom: 4px; }
+  input, textarea, select { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--line); color: var(--ink); font-family: var(--sans); font-size: 14.5px; padding: 6px 2px 8px; border-radius: 0; transition: border-color .15s; }
+  input:focus, textarea:focus, select:focus { outline: none; border-bottom-color: var(--accent); }
+  .mono-field, input[type="time"] { font-family: var(--mono); }
+  textarea { resize: vertical; min-height: 44px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+  .field { margin-bottom: 4px; }
+  @media (max-width: 640px) { .grid2, .grid3, .grid4 { grid-template-columns: 1fr 1fr; } }
+
+  /* ---- credits chips ---- */
+  .credits-list { display: flex; flex-wrap: wrap; gap: 10px; }
+  .credit-chip { display: flex; align-items: center; gap: 6px; background: var(--paper-sunk); border: 1px solid var(--line); border-radius: 20px; padding: 4px 6px 4px 6px; }
+  .credit-chip input { border: none; background: transparent; padding: 3px 6px; font-size: 13px; }
+  .credit-chip input.role { color: var(--ink-dim); font-weight: 600; min-width: 60px; text-align: left; border-left: 1px solid var(--line); }
+  .credit-chip input.name { min-width: 70px; }
+  .credit-chip button { background: none; border: none; color: var(--ink-dim); cursor: pointer; font-size: 13px; padding: 0 4px; }
+  .credit-chip button:hover { color: var(--danger); }
+  .add-chip { border: 1px dashed var(--line); background: none; color: var(--ink-dim); border-radius: 20px; padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: var(--sans); }
+  .add-chip:hover { border-color: var(--accent); color: var(--ink); }
+
+  /* ---- day tabs ---- */
+  .day-tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+  .day-tab { position: relative; }
+  .day-tab button.tab-btn {
+    font-family: var(--mono); font-size: 13px; font-weight: 600; background: var(--paper-raised);
+    border: 1px solid var(--line); color: var(--ink-dim); padding: 9px 16px 9px 30px; border-radius: 8px; cursor: pointer;
+  }
+  .day-tab button.tab-btn.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .day-tab .tab-close { position: absolute; left: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; color: inherit; opacity: .55; cursor: pointer; font-size: 13px; padding: 2px; }
+  .day-tab .tab-close:hover { opacity: 1; }
+  .day-tab-add { font-family: var(--sans); font-size: 13px; background: none; border: 1px dashed var(--line); color: var(--ink-dim); border-radius: 8px; padding: 9px 14px; cursor: pointer; }
+  .day-tab-add:hover { border-color: var(--accent); color: var(--ink); }
+  .day-panel { display: none; }
+  .day-panel.active { display: block; }
+
+  .day-actions { display: flex; gap: 8px; margin-bottom: 14px; }
+  .btn-small { font-family: var(--sans); font-size: 12.5px; background: var(--paper-sunk); border: 1px solid var(--line); color: var(--ink-dim); border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+  .btn-small:hover { color: var(--ink); border-color: var(--accent); }
+
+  .day-badge { font-family: var(--mono); background: var(--accent); color: var(--accent-ink); padding: 6px 14px; border-radius: var(--radius); font-weight: 600; font-size: 13px; white-space: nowrap; }
+
+  /* ---- simple repeatable rows (cast/crew) ---- */
+  .rows { display: flex; flex-direction: column; gap: 10px; }
+  .row { display: grid; gap: 10px; align-items: end; padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
+  .row:last-child { border-bottom: none; padding-bottom: 0; }
+  .row.crew { grid-template-columns: 100px 1.4fr 1fr 1fr 34px; }
+  .row.cast { grid-template-columns: 40px 1.4fr 1fr 100px 1fr 34px; }
+  @media (max-width: 720px) { .row.crew, .row.cast { grid-template-columns: 1fr 1fr; } }
+
+  .icon-btn { background: transparent; border: 1px solid var(--line); color: var(--ink-dim); width: 30px; height: 30px; border-radius: var(--radius); cursor: pointer; font-size: 16px; line-height: 1; display: flex; align-items: center; justify-content: center; align-self: end; transition: border-color .15s, color .15s; flex-shrink: 0; }
+  .icon-btn:hover { border-color: var(--danger); color: var(--danger); }
+  .icon-btn.move:hover { border-color: var(--accent); color: var(--ink); }
+
+  .add-row { margin-top: 12px; background: none; border: 1px dashed var(--line); color: var(--ink-dim); padding: 8px 14px; border-radius: var(--radius); cursor: pointer; font-family: var(--sans); font-size: 13px; transition: border-color .15s, color .15s; }
+  .add-row:hover { border-color: var(--accent); color: var(--ink); }
+  .add-row-group { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .add-row-group .add-row { margin-top: 0; flex: 1; min-width: 160px; }
+
+  /* ---- schedule table ---- */
+  /* the table itself is capped and centered — it spreads out to fill the wide
+     schedule-section on a normal screen, but stops growing past a sensible
+     width on a huge monitor instead of stretching thin and looking sloppy */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; max-width: 1760px; margin: 0 auto; }
+  /* fixed table-layout keeps every column's PROPORTION locked (long text wraps
+     onto more lines instead of the column stretching sideways to fit it) —
+     width:100% then lets the browser scale every column up together to fill
+     the table-scroll wrapper above, up to its capped width.
+     (pdf-export-mode overrides this back to a fixed natural width below, so
+     the exported PDF's column sizing is unaffected.) */
+  table.schedule { border-collapse: collapse; table-layout: fixed; width: 100%; font-size: 13px; border: 1px solid var(--line); }
+  /* full grid borders on-screen (not just a bottom line) — a proper boxed
+     table, closer to how it looks in the exported PDF, instead of loose rows */
+  table.schedule th { font-size: 11px; color: var(--ink-dim); font-weight: 700; text-align: center; padding: 8px 6px; border: 1px solid var(--line); background: var(--paper-sunk); white-space: nowrap; position: sticky; top: 0; }
+  table.schedule td { padding: 4px; border: 1px solid var(--line); vertical-align: top; }
+  table.schedule tr.scene-row:hover td { background: rgba(242,194,48,0.04); }
+  table.schedule td input, table.schedule td textarea, table.schedule td select { border: 1px solid transparent; border-radius: 4px; padding: 6px 6px; font-size: 13px; background: var(--paper-sunk); overflow-wrap: break-word; word-break: break-word; }
+  table.schedule td input:focus, table.schedule td textarea:focus, table.schedule td select:focus { border-color: var(--accent); }
+  table.schedule td textarea { min-height: 34px; resize: vertical; }
+  .col-minutes { width: 48px; }
+  .col-time { width: 82px; }
+  .col-scene { width: 52px; }
+  .col-io { width: 46px; }
+  .col-loc { width: 96px; }
+  .col-desc { width: 210px; }
+  .col-art { width: 84px; }
+  .col-actors { width: 130px; }
+  .col-wardrobe { width: 150px; }
+  .col-notes { width: 130px; }
+  .col-actions { width: 46px; text-align: center; }
+  /* table-layout:fixed needs a hard wrap rule on every cell, or a long
+     unbroken word (rather than typed text with spaces) could still force the
+     column wider than its declared width */
+  table.schedule td, table.schedule th { overflow-wrap: break-word; word-break: break-word; }
+
+  select.io-select { text-align: center; font-weight: 700; cursor: pointer; }
+  select.io-select.io-ext { background: var(--ext); color: var(--ext-ink); border-color: var(--ext); }
+  select.io-select.io-int { background: var(--int); color: var(--int-ink); border-color: var(--int); }
+  select.dn-select { text-align: center; font-weight: 700; cursor: pointer; }
+  select.dn-select.dn-day { background: #f2c230; color: #1a1400; border-color: #f2c230; }
+  select.dn-select.dn-night { background: #2a3b6e; color: #e8ecf9; border-color: #2a3b6e; }
+
+  input.minutes-input { text-align: center; font-family: var(--mono); background: var(--paper-sunk); }
+
+  /* ---- actors cell (numbered chips) ---- */
+  .actors-cell { display: flex; flex-direction: column; gap: 4px; min-width: 140px; }
+  .actor-chip { display: flex; align-items: center; gap: 4px; }
+  .actor-num { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: var(--mono); }
+  .actor-name-input { flex: 1; min-width: 0; padding: 5px 6px; font-size: 12.5px; }
+  .actor-rm { flex-shrink: 0; background: none; border: none; color: var(--ink-dim); cursor: pointer; font-size: 11px; padding: 2px 3px; }
+  .actor-rm:hover { color: var(--danger); }
+  .actor-add { margin-top: 2px; background: none; border: 1px dashed var(--line); color: var(--ink-dim); border-radius: 4px; padding: 5px 8px; font-size: 11.5px; cursor: pointer; font-family: var(--sans); }
+  .actor-add:hover { border-color: var(--accent); color: var(--ink); }
+
+  /* ---- wardrobe cell (synced numbered photo boxes) ---- */
+  .wardrobe-cell { display: flex; flex-wrap: wrap; gap: 10px; align-content: flex-start; }
+  .wardrobe-hint { color: var(--ink-dim); font-size: 11.5px; padding: 6px 2px; }
+  .wardrobe-box { flex-shrink: 0; }
+  .wardrobe-thumb { position: relative; flex-shrink: 0; width: 76px; height: 76px; border-radius: 7px; border: 1px dashed var(--line); background: var(--paper-sunk); cursor: pointer; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .wardrobe-thumb:hover { border-color: var(--accent); }
+  .wardrobe-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .wardrobe-placeholder { font-size: 22px; opacity: .5; }
+  .wardrobe-num { position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: var(--mono); }
+
+  tr.break-row td { background: var(--break-bg); padding: 8px; }
+  tr.break-row .break-inner { display: flex; align-items: center; gap: 10px; }
+  tr.break-row input.break-label { flex: 1; background: transparent; border: none; color: var(--break-ink); font-weight: 700; text-align: center; font-size: 13.5px; }
+  tr.break-row .break-time { width: 110px; display: inline-block; color: var(--break-ink); font-family: var(--mono); text-align: center; font-weight: 600; }
+  .computed-time { font-family: var(--mono); text-align: center; padding: 6px 4px; color: var(--ink-dim); background: var(--paper-sunk); border-radius: 4px; border: 1px dashed var(--line); font-size: 13px; }
+  tr.break-row input.break-minutes { width: 50px; background: transparent; border: none; color: var(--break-ink); font-family: var(--mono); text-align: center; }
+
+  .row-actions-cell { display: flex; gap: 3px; justify-content: center; }
+  .row-actions-cell button { width: 24px; height: 24px; font-size: 12px; padding: 0; }
+
+  footer.credit { text-align: center; color: var(--ink-dim); font-size: 11px; margin-top: 30px; font-family: var(--mono); }
+
+  .toolbar { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; gap: 8px; box-shadow: 0 8px 30px rgba(0,0,0,.35); z-index: 50; flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 20px); }
+  .toolbar button { font-family: var(--sans); font-size: 13px; font-weight: 500; border: none; border-radius: 7px; padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line) !important; }
+  .save-status { font-family: var(--mono); font-size: 11px; color: var(--ink-dim); align-self: center; padding: 0 6px; white-space: nowrap; }
+
+  /* ---- capture mode for client-generated PDF export (mirrors @media print hiding) ---- */
+  body.pdf-export-mode .toolbar,
+  body.pdf-export-mode .day-tabs,
+  body.pdf-export-mode .day-actions,
+  body.pdf-export-mode .add-row,
+  body.pdf-export-mode .add-row-group,
+  body.pdf-export-mode .credit-chip button,
+  body.pdf-export-mode .add-chip,
+  body.pdf-export-mode .col-actions,
+  body.pdf-export-mode .row-actions-cell,
+  body.pdf-export-mode .icon-btn,
+  body.pdf-export-mode .actor-rm,
+  body.pdf-export-mode .actor-add,
+  body.pdf-export-mode .wardrobe-thumb { display: none !important; }
+  body.pdf-export-mode .sync-badge { display: none !important; }
+  body.pdf-export-mode .view-badge { display: none !important; }
+  body.pdf-export-mode footer.credit { display: none !important; }
+  body.pdf-export-mode .modal-overlay { display: none !important; }
+  body.pdf-export-mode input,
+  body.pdf-export-mode textarea,
+  body.pdf-export-mode select:not(.io-select):not(.dn-select) { border: 1px solid #000 !important; background: transparent !important; color: #000 !important; }
+  body.pdf-export-mode section.card { border: 1.5px solid #000 !important; background: #fff; }
+  body.pdf-export-mode .wardrobe-box img { max-width: 60px; max-height: 60px; border-radius: 5px; }
+  /* the default gray tones (labels, hints, dashed borders) read as too faint
+     once actually printed/exported to PDF — darken everything to solid black
+     for export/print specifically, without touching the on-screen theme */
+  body.pdf-export-mode, body.pdf-export-mode h2, body.pdf-export-mode label,
+  body.pdf-export-mode .card h2 .hint, body.pdf-export-mode .day-slate,
+  body.pdf-export-mode .slate, body.pdf-export-mode .computed-time,
+  body.pdf-export-mode table.schedule th, body.pdf-export-mode footer.credit {
+    color: #000 !important;
+  }
+  body.pdf-export-mode .card h2 { border-bottom: 1px solid #000 !important; }
+  body.pdf-export-mode .credit-chip { border: 1px solid #000 !important; }
+  body.pdf-export-mode .credit-chip input.role { border-left: 1px solid #000 !important; }
+  body.pdf-export-mode .computed-time { border: 1px dashed #000 !important; }
+  body.pdf-export-mode .day-badge { border: 1px solid #000 !important; }
+  body.pdf-export-mode table.schedule th { border: 1.5px solid #000 !important; background: #eee !important; position: static !important; top: auto !important; }
+  body.pdf-export-mode table.schedule td { border: 1px solid #000 !important; }
+  body.pdf-export-mode table.schedule { border: 1.5px solid #000 !important; }
+  body.pdf-export-mode .table-scroll { border: 1.5px solid #000 !important; }
+  body.pdf-export-mode .rows .row { border-bottom: 1px dashed #000 !important; }
+  /* the schedule table is wider than the normal page and normally scrolls
+     horizontally — for export, let it fully expand instead of being clipped */
+  body.pdf-export-mode { overflow-x: visible !important; }
+  body.pdf-export-mode .wrap { max-width: none !important; width: max-content !important; }
+  body.pdf-export-mode .table-scroll { overflow: visible !important; max-width: none !important; margin: 0 !important; }
+  body.pdf-export-mode table.schedule { width: max-content !important; }
+  /* the schedule table is captured as its own separate image during export
+     (see exportPDF), so its on-screen full-bleed breakout is turned off here
+     — it would otherwise size itself against the live browser window instead
+     of its own natural content width */
+  body.pdf-export-mode .schedule-section { width: auto !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; padding-left: 18px !important; padding-right: 18px !important; }
+
+  @media print {
+    body { background: white; color: black; padding: 0; }
+    @page { size: landscape; margin: 9mm; }
+    .toolbar, .day-tabs, .day-actions, .add-row, .add-row-group, .credit-chip button, .add-chip { display: none !important; }
+    .sync-badge { display: none !important; }
+    .modal-overlay { display: none !important; }
+    section.card { border: 1px solid #999; break-inside: avoid; background: white; margin-bottom: 10px; }
+    .day-panel { display: none !important; }
+    .day-panel.active { display: block !important; }
+    input, textarea, select { border-bottom: 1px solid #ccc; color: black; background: transparent !important; }
+    table.schedule td input, table.schedule td textarea, table.schedule td select { border: 1px solid #ccc; }
+    .day-badge { background: #eee; color: #000; border: 1px solid #333; }
+    .hazard { background: repeating-linear-gradient(-45deg, #000, #000 10px, white 10px, white 20px); }
+    .col-actions, .row-actions-cell, .icon-btn { display: none !important; }
+    .actor-rm, .actor-add { display: none !important; }
+    .wardrobe-thumb { cursor: default; border-style: solid; border-color: #ccc; }
+    .wardrobe-box img { max-width: 60px; max-height: 60px; border-radius: 5px; }
+    .wardrobe-num { background: var(--accent) !important; color: var(--accent-ink) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .schedule-section { break-before: page; page-break-before: always; }
+    table.schedule th { background: #eee; color: #000; position: static; top: auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    select.io-select.io-ext { background: var(--ext) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    select.io-select.io-int { background: var(--int) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    select.dn-select.dn-day { background: #f2c230 !important; color: #1a1400 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    select.dn-select.dn-night { background: #2a3b6e !important; color: #e8ecf9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tr.break-row td { background: #f3d8d5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .actor-num { background: var(--accent) !important; color: var(--accent-ink) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .credit-chip { border: 1px solid #ccc; }
+  }
+
+  /* ---- in-page dialog (replaces native confirm()/alert(), which the artifact's
+     sandboxed frame silently blocks — those calls returned undefined and any
+     "if (!confirm(...)) return;" bailed out with no visible sign anything happened) ---- */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+  }
+  .modal-message { margin: 0 0 18px; font-size: 14.5px; line-height: 1.5; color: var(--ink); white-space: pre-line; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-btn { font-family: var(--sans); font-size: 13.5px; font-weight: 500; border: none; border-radius: 7px; padding: 10px 18px; cursor: pointer; }
+  .modal-btn-ok { background: var(--accent); color: var(--accent-ink); }
+  .modal-btn-cancel { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+
+  /* ---- editor login: everyone with the link can view; entering the editor
+     code unlocks editing. No gate blocks viewing at all. ---- */
+  .edit-login-overlay {
+    display: none; position: fixed; inset: 0; z-index: 500; align-items: center;
+    justify-content: center; padding: 20px; background: rgba(0,0,0,.5);
+  }
+  .edit-login-overlay.open { display: flex; }
+  .access-gate-box {
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: 10px;
+    padding: 32px 28px; max-width: 360px; width: 100%; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  }
+  .access-gate-box h1 { font-size: 17px; margin: 0 0 6px; color: var(--ink); }
+  .access-gate-box p { font-size: 13px; color: var(--ink-dim); margin: 0 0 20px; }
+  .access-gate-box input {
+    width: 100%; box-sizing: border-box; font-family: var(--mono); font-size: 20px;
+    text-align: center; letter-spacing: 3px; padding: 12px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--paper-sunk); color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .access-gate-box button {
+    width: 100%; font-family: var(--sans); font-size: 14px; font-weight: 600;
+    padding: 11px; border: none; border-radius: 8px; background: var(--accent);
+    color: var(--accent-ink); cursor: pointer;
+  }
+  .access-gate-error { color: var(--danger); font-size: 13px; min-height: 18px; margin-top: 10px; }
+  .access-gate-cancel {
+    margin-top: 8px; background: none !important; border: none; color: var(--ink-dim) !important;
+    font-size: 12px !important; font-weight: 400 !important; text-decoration: underline; cursor: pointer;
+  }
+  .view-badge {
+    font-family: var(--sans); font-size: 12px; color: var(--ink-dim);
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: 20px;
+    padding: 5px 12px; cursor: pointer; white-space: nowrap;
+  }
+
+  /* view-only mode (the default for everyone until the editor code is entered):
+     freeze every field, hide anything that adds/removes/imports/resets */
+  body.view-only-mode .wrap input,
+  body.view-only-mode .wrap textarea,
+  body.view-only-mode .wrap select { pointer-events: none; background: var(--paper-sunk) !important; }
+  /* ...but the day/night and int/ext badges carry meaning through color —
+     keep their yellow/navy/orange/green look in view-only mode instead of
+     falling back to plain gray like an ordinary disabled field */
+  body.view-only-mode .wrap select.io-select,
+  body.view-only-mode .wrap select.dn-select { pointer-events: none; }
+  body.view-only-mode .wrap select.io-select.io-ext { background: var(--ext) !important; color: var(--ext-ink) !important; }
+  body.view-only-mode .wrap select.io-select.io-int { background: var(--int) !important; color: var(--int-ink) !important; }
+  body.view-only-mode .wrap select.dn-select.dn-day { background: #f2c230 !important; color: #1a1400 !important; }
+  body.view-only-mode .wrap select.dn-select.dn-night { background: #2a3b6e !important; color: #e8ecf9 !important; }
+  body.view-only-mode .add-chip,
+  body.view-only-mode .add-row,
+  body.view-only-mode .add-row-group,
+  body.view-only-mode .credit-chip button,
+  body.view-only-mode .col-actions,
+  body.view-only-mode .row-actions-cell,
+  body.view-only-mode .icon-btn,
+  body.view-only-mode .actor-rm,
+  body.view-only-mode .actor-add,
+  body.view-only-mode .wardrobe-thumb,
+  body.view-only-mode .day-actions,
+  body.view-only-mode #importBtn,
+</style>
+</head>
+<body>
+
+<div class="edit-login-overlay" id="editLoginOverlay">
+  <form class="access-gate-box" id="accessGateForm">
+    <h1>כניסה כעורך/ת</h1>
+    <p>הקלידו את קוד העריכה כדי לפתוח את כל השדות לעריכה</p>
+    <input id="accessGateInput" type="text" inputmode="numeric" autocomplete="off" placeholder="קוד עריכה" autofocus />
+    <button type="submit">כניסה כעורך/ת</button>
+    <button type="button" class="access-gate-cancel" id="accessGateCancel">ביטול</button>
+    <div class="access-gate-error" id="accessGateError"></div>
+  </form>
+</div>
+
+<div class="wrap">
+
+  <div class="hazard"></div>
+  <header class="top">
+    <div>
+      <div class="slate">CALL SHEET · MULTI-DAY</div>
+      <div class="title-row">
+        <input class="title-input" id="prodTitle" placeholder="שם ההפקה / הפרק" />
+      </div>
+      <input class="company-input" id="prodCompany" placeholder="חברת הפקה" style="margin-top:6px;" />
+    </div>
+    <span class="view-badge" id="viewBadge">👁️ מצב צפייה — לחצו כדי להיכנס כעורך/ת</span>
+    <span class="sync-badge" id="syncBadge">🔄 בודק זמינות שיתוף…</span>
+  </header>
+
+  <!-- Credits -->
+  <section class="card">
+    <h2>אנשי מפתח <span class="hint">תפקיד ושם — יופיע בראש כל קולשיט</span></h2>
+    <div class="credits-list" id="creditsList"></div>
+    <button class="add-chip" id="addCredit" type="button">+ הוספת תפקיד</button>
+  </section>
+
+  <!-- Day tabs -->
+  <div class="day-tabs" id="dayTabs"></div>
+
+  <div id="dayPanels"></div>
+
+  <input type="file" id="importFileInput" accept="application/json,.json" style="display:none">
+  <footer class="credit">נשמר אוטומטית בדפדפן זה בלבד · הדפסה מייצאת את היום הפעיל בלבד</footer>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <p class="modal-message" id="modalMessage"></p>
+    <div class="modal-actions" id="modalActions">
+      <button class="modal-btn modal-btn-cancel" id="modalCancelBtn" type="button">ביטול</button>
+      <button class="modal-btn modal-btn-ok" id="modalOkBtn" type="button">אישור</button>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="btn-primary" id="printBtn" type="button">🖨️ הדפסה (PDF מסודר)</button>
+  <button class="btn-ghost" id="exportPdfBtn" type="button">📄 ייצוא PDF</button>
+  <button class="btn-ghost" id="exportWordBtn" type="button">📝 ייצוא Word</button>
+  <button class="btn-ghost" id="exportBtn" type="button">⬇️ הורדת גיבוי</button>
+  <button class="btn-ghost" id="importBtn" type="button">⬆️ טעינת גיבוי</button>
+  <span class="save-status" id="saveStatus">נשמר</span>
+</div>
+
+<script>
+(function() {
+  const STORAGE_KEY = 'callsheet:v2:draft';
+  let uidCounter = 1;
+  function uid() { return 'id' + (uidCounter++) + '_' + Math.random().toString(36).slice(2,7); }
+
+  /* ---------- editor access code ----------
+     Anyone who has the link can view, print and export — no code needed for
+     that at all. Only switching into EDIT mode (unlocking every field, plus
+     add/remove/import/reset) requires this code. Once entered, it's
+     remembered in this browser (localStorage) so it isn't asked again here.
+     To change the code later, just edit EDITOR_CODE below and republish. */
+  const EDITOR_CODE = '56789';
+  const EDIT_ROLE_KEY = 'callsheet:isEditor';
+
+  function isEditor() {
+    try { return localStorage.getItem(EDIT_ROLE_KEY) === '1'; } catch (e) { return false; }
+  }
+  function applyEditRoleUI() {
+    const editing = isEditor();
+    document.body.classList.toggle('view-only-mode', !editing);
+    const badge = document.getElementById('viewBadge');
+    if (badge) badge.textContent = editing ? '✏️ מצב עריכה — לחצו כדי לחזור לצפייה' : '👁️ מצב צפייה — לחצו כדי להיכנס כעורך/ת';
+  }
+  function openEditLogin() {
+    document.getElementById('accessGateError').textContent = '';
+    document.getElementById('accessGateInput').value = '';
+    document.getElementById('editLoginOverlay').classList.add('open');
+    document.getElementById('accessGateInput').focus();
+  }
+  function closeEditLogin() {
+    document.getElementById('editLoginOverlay').classList.remove('open');
+  }
+  function initEditGate() {
+    applyEditRoleUI();
+    document.getElementById('viewBadge').addEventListener('click', () => {
+      if (isEditor()) {
+        try { localStorage.removeItem(EDIT_ROLE_KEY); } catch (e) {}
+        applyEditRoleUI();
+      } else {
+        openEditLogin();
+      }
+    });
+    document.getElementById('accessGateCancel').addEventListener('click', closeEditLogin);
+    document.getElementById('editLoginOverlay').addEventListener('click', (ev) => {
+      if (ev.target.id === 'editLoginOverlay') closeEditLogin();
+    });
+    document.getElementById('accessGateForm').addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const code = document.getElementById('accessGateInput').value.trim();
+      if (code === EDITOR_CODE) {
+        try { localStorage.setItem(EDIT_ROLE_KEY, '1'); } catch (e) {}
+        applyEditRoleUI();
+        closeEditLogin();
+      } else {
+        document.getElementById('accessGateError').textContent = 'קוד שגוי, נסו שוב.';
+        document.getElementById('accessGateInput').value = '';
+        document.getElementById('accessGateInput').focus();
+      }
+    });
+  }
+
+  function blankCredit(role) { return { id: uid(), role: role || '', name: '' }; }
+  function blankScene() { return { id: uid(), type: 'scene', time: '', sceneNum: '', pages: '', io: 'ח', dayNight: 'יום', location: '', desc: '', actorsList: [], extrasList: [], art: '', wardrobePhotos: {}, notes: '', minutes: '' }; }
+  function blankBreak() { return { id: uid(), type: 'break', time: '', label: '', minutes: '' }; }
+  function blankCast() { return { id: uid(), num: '', name: '', role: '', call: '', pickup: '' }; }
+
+  /* ---------- in-page dialog: replaces window.alert / window.confirm ----------
+     The artifact runs in a sandboxed iframe where native dialogs are silently
+     blocked (confirm() returns undefined/false with no dialog ever shown), so
+     any code written as "if (!confirm(...)) return;" would quietly no-op —
+     exactly the "the button does nothing" symptom. showAlert/showConfirm below
+     render a real in-page dialog instead and resolve a Promise on the user's
+     choice. */
+  let modalResolver = null;
+  function closeModal(result) {
+    document.getElementById('modalOverlay').classList.remove('open');
+    if (modalResolver) { const r = modalResolver; modalResolver = null; r(result); }
+  }
+  function showAlert(message) {
+    return new Promise((resolve) => {
+      modalResolver = () => resolve(undefined);
+      document.getElementById('modalMessage').textContent = message;
+      document.getElementById('modalCancelBtn').style.display = 'none';
+      document.getElementById('modalOkBtn').textContent = 'הבנתי';
+      document.getElementById('modalOverlay').classList.add('open');
+    });
+  }
+  function showConfirm(message) {
+    return new Promise((resolve) => {
+      modalResolver = resolve;
+      document.getElementById('modalMessage').textContent = message;
+      document.getElementById('modalCancelBtn').style.display = '';
+      document.getElementById('modalOkBtn').textContent = 'אישור';
+      document.getElementById('modalOverlay').classList.add('open');
+    });
+  }
+  document.getElementById('modalOkBtn').addEventListener('click', () => closeModal(true));
+  document.getElementById('modalCancelBtn').addEventListener('click', () => closeModal(false));
+  document.getElementById('modalOverlay').addEventListener('click', (ev) => {
+    if (ev.target.id === 'modalOverlay') closeModal(false);
+  });
+
+  /* ---------- Claude runtime capability + dynamic library loader ---------- */
+  async function useCapability(name) {
+    try {
+      if (!window.claude || typeof window.claude.use !== 'function') return null;
+      return await window.claude.use(name);
+    } catch (e) { return null; }
+  }
+  // Claude's own "downloads" capability only exists inside claude.ai's artifact
+  // viewer — on a real, independently-hosted page (e.g. GitHub Pages) there is
+  // no window.claude at all, so useCapability('downloads') always returns
+  // null there. This is the ordinary way every other website saves a file:
+  // a plain <a download> link on a Blob URL, no special permission needed.
+  function saveFileNatively({ filename, data }) {
+    const url = URL.createObjectURL(data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+  async function saveFile({ filename, data }) {
+    const downloads = await useCapability('downloads');
+    if (downloads) { await downloads.save({ filename, data }); return; }
+    saveFileNatively({ filename, data });
+  }
+  function loadScriptOnce(src, checkLoaded) {
+    return new Promise((resolve, reject) => {
+      if (checkLoaded()) { resolve(); return; }
+      const existing = document.querySelector('script[data-src="' + src + '"]');
+      if (existing) {
+        existing.addEventListener('load', () => resolve());
+        existing.addEventListener('error', () => reject(new Error('load failed: ' + src)));
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = src;
+      s.setAttribute('data-src', src);
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('load failed: ' + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  /* ---------- photo storage (IndexedDB — photos can exceed localStorage's size limit) ---------- */
+  const PHOTO_DB_NAME = 'callsheetPhotosDB';
+  const PHOTO_STORE = 'photos';
+  let photoDbPromise = null;
+  function openPhotoDB() {
+    if (photoDbPromise) return photoDbPromise;
+    photoDbPromise = new Promise((resolve, reject) => {
+      try {
+        const req = indexedDB.open(PHOTO_DB_NAME, 1);
+        req.onupgradeneeded = () => { req.result.createObjectStore(PHOTO_STORE); };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      } catch (e) { reject(e); }
+    });
+    return photoDbPromise;
+  }
+  async function savePhoto(key, dataUrl) {
+    const db = await openPhotoDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(PHOTO_STORE, 'readwrite');
+      tx.objectStore(PHOTO_STORE).put(dataUrl, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  async function getPhoto(key) {
+    if (!key) return null;
+    try {
+      const db = await openPhotoDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(PHOTO_STORE, 'readonly');
+        const req = tx.objectStore(PHOTO_STORE).get(key);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+    } catch (e) { return null; }
+  }
+  async function deletePhoto(key) {
+    const db = await openPhotoDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(PHOTO_STORE, 'readwrite');
+      tx.objectStore(PHOTO_STORE).delete(key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  /* ---------- time math for auto-calculated schedule ---------- */
+  function parseTimeStr(str) {
+    if (!str) return null;
+    const m = /^(\d{1,2}):(\d{2})$/.exec(String(str).trim());
+    if (!m) return null;
+    return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  }
+  function formatMinutesAsTime(total) {
+    if (total == null || isNaN(total)) return '';
+    // Clock times wrap at 24:00 — a schedule that runs past midnight should
+    // show 00:15, 01:30 etc. (a new day on the clock), never 24:15, 25:30.
+    const wrapped = ((total % 1440) + 1440) % 1440;
+    const h = Math.floor(wrapped / 60);
+    const m = wrapped % 60;
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  }
+  // Walks the schedule in order, starting from day.scheduleStart, and returns
+  // an array of {start, end, durationMin} aligned with day.schedule indices.
+  // Reordering rows automatically shifts every following time, since each
+  // row's start is simply the previous row's end.
+  function computeScheduleTimes(day) {
+    let cursor = parseTimeStr(day.scheduleStart);
+    return day.schedule.map(item => {
+      if (cursor == null) return { start: null, end: null, durationMin: null };
+      const dur = parseInt(item.minutes, 10);
+      const validDur = isNaN(dur) ? 0 : dur;
+      const start = cursor;
+      const end = cursor + validDur;
+      cursor = end;
+      return { start, end, durationMin: isNaN(dur) ? null : validDur };
+    });
+  }
+  function formatComputedRange(t) {
+    if (!t || t.start == null) return '—';
+    if (!t.durationMin) return formatMinutesAsTime(t.start);
+    return formatMinutesAsTime(t.start) + '-' + formatMinutesAsTime(t.end);
+  }
+  // Total elapsed shooting time (start to end, including any breaks in
+  // between) plus the day's end time — both derived from the same schedule
+  // walk as the per-row times above, so they always stay in sync.
+  function computeDayTotals(day) {
+    const times = computeScheduleTimes(day);
+    let endTime = null;
+    for (let i = times.length - 1; i >= 0; i--) {
+      if (times[i] && times[i].end != null) { endTime = times[i].end; break; }
+    }
+    const startTime = parseTimeStr(day.scheduleStart);
+    const totalMin = (startTime != null && endTime != null) ? (endTime - startTime) : null;
+    return { endTime, totalMin };
+  }
+  function formatDurationHM(totalMin) {
+    if (totalMin == null || isNaN(totalMin)) return '—';
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return h + ':' + String(m).padStart(2, '0') + ' שעות';
+  }
+  // The day-meta "סצנות" summary is derived straight from the "סצנה מס'"
+  // column of the schedule below, in order, rather than typed separately —
+  // scene numbers are free text (e.g. "5-8" for a range), not plain
+  // integers, so this just lists what's actually entered instead of doing
+  // arithmetic on it.
+  function computeScenesSummary(day) {
+    const nums = (day.schedule || [])
+      .filter(item => item.type !== 'break' && item.sceneNum && item.sceneNum.trim())
+      .map(item => item.sceneNum.trim());
+    return nums.length ? nums.join(', ') : '—';
+  }
+
+  function blankDay(n) {
+    return {
+      id: uid(), label: 'יום ' + n, dayNum: String(n), totalDays: '4', date: '',
+      generalCall: '', sunrise: '', sunset: '',
+      mainLocation: '', parking: '', hospital: '', scenesCount: '', scheduleStart: '',
+      schedule: [ blankScene() ],
+      cast: [ blankCast() ],
+      notes: ''
+    };
+  }
+
+  const defaultRoles = ['בימוי','הפקה בפועל','צלם/ת','צלם/ת 2','תאורה','ארט והלבשה','נערת/עורך תסריט','סאונד','איפור'];
+
+  // Baked-in default: the production's real, current call sheet data. This is
+  // what anyone opening the link sees immediately, from any device or Claude
+  // account — it does NOT depend on the shared-database capability (which
+  // only syncs between browsers on the SAME Claude account/organization, not
+  // across arbitrary accounts). loadLocal()/initDb() below will still
+  // override this with whatever is saved in that browser's own storage, or
+  // with the live shared doc, when either is available.
+  const DEFAULT_STATE = {"activeDayId": "id22_xrtzq", "credits": [{"id": "id1_4a0nn", "name": "מטי זילברברג", "role": "בימוי"}, {"id": "id2_n4x3h", "name": "אלישבע מלכה", "role": "הפקה "}, {"id": "id3_xxxlp", "name": "שרה שיינמן", "role": "צלם/ת"}, {"id": "id5_kzlqc", "name": "זושא קפלן", "role": "תאורה"}, {"id": "id6_i3wdz", "name": "בתיה קליקשטיין", "role": "ארט "}, {"id": "id8_ik9fz", "name": "יעקב גרינשטיין", "role": "סאונד"}, {"id": "id9_mb7ab", "name": "שהם לוי", "role": "איפור"}, {"id": "id26_sdwy6", "name": "שרית שניידר", "role": "הלבשה"}, {"id": "id27_h20fj", "name": "יעל ארביב", "role": "ע.הפקה ראשית"}, {"id": "id28_klkqk", "name": "נעמי קונפיצקי", "role": "שיער "}], "days": [{"cast": [{"call": "", "id": "id12_kxpvk", "name": "", "num": "", "pickup": "", "role": ""}], "crew": [{"call": "", "dept": "", "id": "id13_z3zrd", "name": "", "role": ""}], "date": "2026-10-06", "dayNum": "1", "generalCall": "07:00", "hospital": "בלינסון . פ\"ת", "id": "id10_0qorh", "label": "יום 1", "mainLocation": "שחף 1 סביון", "notes": "", "parking": "חניה צמודה", "scenesCount": "6, 7, 27, 15, 19, 28, 16", "schedule": [{"id": "id29_518iq", "label": "הגעת צוות וחניות", "minutes": "15", "time": "6:50-7:00 ", "type": "break"}, {"id": "id26_s9i09", "label": "ארוחת בוקר והתמקמות מחלקות", "minutes": "20", "time": "", "type": "break"}, {"id": "id29_nrcxp", "label": "הקמות תאורה סלון", "minutes": "100", "time": "", "type": "break"}, {"actorsList": [{"id": "id26_f5swm", "name": "בתיה"}, {"id": "id27_wp7dt", "name": "אתי"}, {"id": "id28_p4occ", "name": "פמי"}], "art": "", "dayNight": "יום", "desc": "בתיה נכנסת \nהבתיה עם שקית המשקפיים.", "extrasList": [{"id": "id26_8434j", "name": "0"}], "id": "id11_07per", "io": "פ", "location": "סלון בית", "minutes": "120", "notes": "פמי מצטרפת בסוף הסצנה", "pages": "5-8", "sceneNum": "6", "time": "", "type": "scene", "wardrobePhotos": {"id26_f5swm": "id11_07per_id26_f5swm", "id28_p4occ": "id11_07per_id28_p4occ"}}, {"actorsList": [{"id": "id26_1t3ft", "name": "בתיה"}, {"id": "id27_2cjx4", "name": "פמי"}, {"id": "id28_sqwnd", "name": "אתי"}], "art": "", "dayNight": "לילה", "desc": "בתיה יושבת על הספה, \nמנסה לקרא משהו,\nאתי מפריעה לה", "extrasList": [{"id": "id27_kztde", "name": "0"}], "id": "id30_9teyk", "io": "פ", "location": "סלון בית", "minutes": "90", "notes": "להחליט מיקום מדוייק בבית", "pages": "8-12", "sceneNum": "7", "time": "", "type": "scene", "wardrobePhotos": {"id26_1t3ft": "id30_9teyk_id26_1t3ft", "id27_2cjx4": "id30_9teyk_id27_2cjx4"}}, {"id": "id22_hxxbu", "type": "scene", "time": "", "sceneNum": "27", "pages": "38-40", "io": "פ", "dayNight": "יום", "location": "סלון בית", "desc": "בתיה פותחת את ההזמנות ופמי משכנעת אותה לבטל את החתונה", "actorsList": [{"id": "id24_wrt9h", "name": "בתיה"}, {"id": "id26_r14p6", "name": "פמי"}], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": "60"}, {"actorsList": [{"id": "id23_z7ic8", "name": "בתיה"}, {"id": "id24_ya8cy", "name": "פמי"}, {"id": "id25_i39vl", "name": "אתי"}], "art": "", "dayNight": "יום", "desc": "פמי מודיעה לבתיה שתוקפה עומד להסתיים", "extrasList": [], "id": "id26_s0s5b", "io": "פ", "location": "מטבח", "minutes": "75", "notes": "", "pages": "23-26", "sceneNum": "15", "time": "", "type": "scene", "wardrobePhotos": {}}, {"id": "id22_oanig", "type": "break", "time": "", "label": "הפסקת צהריים", "minutes": "45"}, {"id": "id27_0r1v4", "type": "scene", "time": "", "sceneNum": "19", "pages": "28-29", "io": "פ", "dayNight": "יום", "location": "חדר בתיה", "desc": "בבית, בתיה מנסה להסתדר בלי פמי אך נעשית עצבנית וחסרת סבלנות כלפי אתי.", "actorsList": [{"id": "id28_cs5by", "name": "בתיה"}, {"id": "id29_d1cwf", "name": "אתי"}], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": "60"}, {"id": "id23_7nwzn", "type": "scene", "time": "", "sceneNum": "28", "pages": "40-42", "io": "ח", "dayNight": "יום", "location": "מרפסת חדר בתיה", "desc": "במקביל: אפי מתעמתת עם הזכיינית ובתיה מתעמתת עם פמי, שוברת את המשקפיים ובוחרת להתנתק ממנה.", "actorsList": [{"id": "id25_jpltr", "name": "בתיה"}, {"id": "id26_oomhs", "name": "פמי"}, {"id": "id27_p9f4w", "name": "אתי"}], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": "60"}, {"id": "id22_jj3su", "type": "scene", "time": "", "sceneNum": "16", "pages": "26-27", "io": "ח", "dayNight": "לילה", "location": "חוץ לבית", "desc": "בתיה מסתובבת לבדה בחורשה", "actorsList": [{"id": "id26_cyeez", "name": "בתיה"}], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "לקחת VO של בתיה קודם", "minutes": "20"}, {"id": "id22_fg5ui", "type": "break", "time": "", "label": "", "minutes": ""}], "scheduleStart": "06:45", "specialNote": "", "sunrise": "", "sunset": "18:20", "tempHigh": "", "tempLow": "", "totalDays": "4", "weatherDesc": ""}, {"cast": [{"call": "", "id": "id16_mp7a1", "name": "", "num": "", "pickup": "", "role": ""}], "crew": [{"call": "", "dept": "", "id": "id17_pdb8b", "name": "", "role": ""}], "date": "2026-10-08", "dayNum": "2", "generalCall": "06:30", "hospital": "שיבא", "id": "id14_8o08i", "label": "יום 2", "mainLocation": "המסגר 42 קומת קרקע", "notes": "", "parking": "חניון שונצינו", "schedule": [{"id": "id26_kjgvj", "label": "הגעת צוות.חניות והתמקמות", "minutes": "15", "time": "", "type": "break"}, {"id": "id27_nrdej", "label": "הקמות תאורה +ארוחת בוקר+ הלבשה ואיפור", "minutes": "120", "time": "", "type": "break"}, {"actorsList": [{"id": "id28_84xzm", "name": "בתיה"}, {"id": "id26_xcdvz", "name": "נעמה שירוביץ"}, {"id": "id29_35cyu", "name": "מרים המזכירה"}], "art": "", "dayNight": "יום", "desc": "ם העבודה הראשון לבתיה היא פוגשת את נעמה ומרים ונחשפת להמולת המשרד.", "extrasList": [{"id": "id28_k53fa", "name": "אישה א"}, {"id": "id30_jjw8y", "name": "אישה ב'"}, {"id": "id31_rfypu", "name": "8 ניצבות"}], "id": "id15_yizca", "io": "פ", "location": "אופן ספייס", "minutes": "120", "notes": "", "pages": "2-3", "sceneNum": "3", "time": "", "type": "scene", "wardrobePhotos": {"id28_84xzm": "id15_yizca_id28_84xzm"}}, {"actorsList": [{"id": "id34_og555", "name": "בתיה"}, {"id": "id35_i1537", "name": "נעמה שירוביץ"}, {"id": "id36_nxsee", "name": "מרים המזכירה"}, {"id": "id37_dpw2z", "name": "שפרה העורכת"}], "art": "", "dayNight": "יום", "desc": "בתיה נכנסת לחדר העורכת, פוגשת את שפרה ונעמה והתקבלה לעבודה בהגהה.", "extrasList": [{"id": "id26_nugh0", "name": "8 ניצבות"}], "id": "id32_xcpw4", "io": "פ", "location": "חדר עורכת", "minutes": "90", "notes": "", "pages": "3-4", "sceneNum": "4", "time": "", "type": "scene", "wardrobePhotos": {"id34_og555": "id32_xcpw4_id34_og555"}}, {"id": "id27_f3hjr", "label": "", "minutes": "45", "time": "", "type": "break"}, {"actorsList": [{"id": "id29_vkur8", "name": "בתיה"}, {"id": "id30_gltxd", "name": "פמי"}], "art": "", "dayNight": "יום", "desc": "במשרד פמי מסייעת לבתיה; העובדות מגלות שקבצים נעלמו ובהם הכתבה החשובה של נעמה.", "extrasList": [{"id": "id31_9p9ak", "name": "עובדת 1"}, {"id": "id32_4pl6q", "name": "עובדת 2"}, {"id": "id33_2thhn", "name": "עובדת 3"}], "id": "id28_ozz5n", "io": "פ", "location": "פינת קפה", "minutes": "", "notes": "", "pages": "12-14", "sceneNum": "8", "time": "", "type": "scene", "wardrobePhotos": {"id29_vkur8": "id28_ozz5n_id29_vkur8", "id30_gltxd": "id28_ozz5n_id30_gltxd"}}, {"actorsList": [{"id": "id35_pvafr", "name": "בתיה"}, {"id": "id36_wxqjg", "name": "פמי"}, {"id": "id37_yulrg", "name": "נעמה שירוביץ"}, {"id": "id38_ykqv6", "name": "שפרה העורכת"}], "art": "", "dayNight": "יום", "desc": "בתיה מציעה לשחזר את הכתבה האבודה ומדהימה את נעמה ושפרה ביכולותיה.", "extrasList": [], "id": "id34_4b1ga", "io": "פ", "location": "חדר עורכת", "minutes": "60", "notes": "", "pages": "14-17", "sceneNum": "9", "time": "", "type": "scene", "wardrobePhotos": {}}, {"id": "id26_if0o3", "type": "scene", "time": "", "sceneNum": "10", "pages": "17-18", "io": "ח", "dayNight": "יום", "location": "חוץ המשרדים", "desc": "בתיה יוצאת מהעבודה נסערת פמי משכנעת שההצלחה שייכת גם לה.", "actorsList": [{"id": "id26_qlq5g", "name": "בתיה"}, {"id": "id27_trceh", "name": "פמי"}], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": "30"}, {"id": "id27_dtt4z", "type": "scene", "time": "", "sceneNum": "12", "pages": "18-19", "io": "פ", "dayNight": "יום", "location": "אופן ספייס", "desc": "שפרה ונעמה מזמינות את בתיה למפגש הכותבות בעקבות הכישרון המרשים שהפגינה.", "actorsList": [{"id": "id29_kj5vv", "name": "בתיה"}, {"id": "id30_321zn", "name": "שפרה"}, {"id": "id31_d1r2r", "name": "נעמה"}], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": "45"}, {"id": "id32_omauq", "type": "scene", "time": "", "sceneNum": "17", "pages": "27-28", "io": "פ", "dayNight": "יום", "location": "אופן ספייס", "desc": "מרים מנסה לעודד את בתיה המדוכדכת", "actorsList": [{"id": "id33_uw8nu", "name": "בתיה"}, {"id": "id34_6i8oc", "name": "מרים"}], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": "60"}, {"id": "id28_fe5c1", "type": "scene", "time": "", "sceneNum": "13", "pages": "19-22", "io": "פ", "dayNight": "יום", "location": "חדר ישיבות", "desc": "מפגש הכותבות בתיה נשענת על פמי, אך כשפמי נעלמת לרגע היא נותרת חסרת אונים מול כולן.", "actorsList": [{"id": "id23_8aabn", "name": "בתיה"}, {"id": "id24_demmu", "name": "פמי"}, {"id": "id25_7tfvm", "name": "נעמה שירוביץ"}], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": "90"}, {"id": "id35_51bm3", "type": "scene", "time": "", "sceneNum": "22", "pages": "35", "io": "פ", "dayNight": "יום", "location": "אופן ספייס", "desc": "בתיה מגיעה מאורסת למשרד", "actorsList": [{"id": "id22_qmnej", "name": "בתיה"}], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": "45"}], "scheduleStart": "06:30", "specialNote": "", "sunrise": "", "sunset": "", "tempHigh": "", "tempLow": "", "totalDays": "4", "weatherDesc": "", "scenesCount": "3, 4, 8, 9, 10, 12, 17, 13, 22"}, {"cast": [{"call": "", "id": "id20_4mgfq", "name": "בתיה", "num": "1", "pickup": "", "role": ""}, {"id": "id26_vzvee", "num": "2", "name": "אפי", "role": "", "call": "", "pickup": ""}, {"id": "id27_dq4jn", "num": "3", "name": "מפתחת פמי", "role": "", "call": "", "pickup": ""}], "crew": [{"call": "", "dept": "", "id": "id21_d5tpd", "name": "", "role": ""}], "date": "2026-10-12", "dayNum": "3", "generalCall": "21:00", "hospital": "מעייני הישועה", "id": "id18_mvcci", "label": "יום 3", "mainLocation": "חנות משקפיים VISTA", "notes": "", "parking": "שלמה המלך 12, בני ברק.", "schedule": [{"id": "id28_wcefr", "type": "break", "time": "", "label": "הקמות תאורה ופתיחת סט", "minutes": "180"}, {"actorsList": [{"id": "id29_an1dn", "name": "בתיה"}, {"id": "id30_j0y4f", "name": "אפיה"}, {"id": "id31_ya22b", "name": "פמי"}], "art": "", "dayNight": "לילה", "desc": "", "extrasList": [{"id": "id32_6xusz", "name": "עובדות חנות"}, {"id": "id33_bsbny", "name": "יוליה"}], "id": "id19_mef1x", "io": "פ", "location": "חנות המשקפיים", "minutes": "150", "notes": "", "sceneNum": "20", "time": "", "type": "scene", "wardrobePhotos": {}, "pages": "29-34"}, {"id": "id22_b65wg", "type": "break", "time": "", "label": "הפסקת אוכל", "minutes": "45"}, {"id": "id24_w100e", "type": "scene", "time": "", "sceneNum": "28", "pages": "", "io": "ח", "dayNight": "יום", "location": "", "desc": "", "actorsList": [], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": "60"}, {"id": "id25_ftf2u", "type": "break", "time": "", "label": "קיפול סט", "minutes": "60"}], "specialNote": "", "sunrise": "06:43", "sunset": "", "tempHigh": "", "tempLow": "", "totalDays": "4", "weatherDesc": "", "scenesCount": "20, 28", "scheduleStart": "21:00"}, {"cast": [{"call": "", "id": "id24_ogubl", "name": "אלונה צימברג", "num": "", "pickup": "", "role": "בתיה"}, {"id": "id22_9qu03", "num": "", "name": "פסיכולוגית", "role": "", "call": "", "pickup": ""}], "crew": [{"call": "", "dept": "", "id": "id25_jcyds", "name": "", "role": ""}], "date": "2026-10-15", "dayNum": "4", "generalCall": "", "hospital": "", "id": "id22_xrtzq", "label": "יום 4", "mainLocation": "", "notes": "", "parking": "", "schedule": [{"actorsList": [], "art": "", "dayNight": "יום", "desc": "", "extrasList": [], "id": "id23_ggft1", "io": "ח", "location": "", "minutes": "", "notes": "", "sceneNum": "2", "time": "", "type": "scene", "wardrobePhotos": {}}, {"id": "id23_i68yy", "type": "scene", "time": "", "sceneNum": "5", "pages": "", "io": "ח", "dayNight": "יום", "location": "", "desc": "", "actorsList": [], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": ""}, {"id": "id24_xgikz", "type": "scene", "time": "", "sceneNum": "11", "pages": "", "io": "ח", "dayNight": "יום", "location": "", "desc": "", "actorsList": [], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": ""}, {"id": "id25_bvibl", "type": "scene", "time": "", "sceneNum": "14", "pages": "", "io": "ח", "dayNight": "יום", "location": "", "desc": "", "actorsList": [], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": ""}, {"id": "id26_yu5tj", "type": "scene", "time": "", "sceneNum": "18", "pages": "", "io": "ח", "dayNight": "יום", "location": "", "desc": "", "actorsList": [], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": ""}, {"id": "id27_48k0x", "type": "scene", "time": "", "sceneNum": "21", "pages": "", "io": "ח", "dayNight": "יום", "location": "", "desc": "", "actorsList": [], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": ""}, {"id": "id28_mzxsg", "type": "scene", "time": "", "sceneNum": "26", "pages": "", "io": "ח", "dayNight": "יום", "location": "", "desc": "", "actorsList": [], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": ""}, {"id": "id29_42j0d", "type": "scene", "time": "", "sceneNum": "23", "pages": "", "io": "ח", "dayNight": "יום", "location": "", "desc": "", "actorsList": [], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": ""}, {"id": "id30_ouao2", "type": "scene", "time": "", "sceneNum": "24", "pages": "", "io": "ח", "dayNight": "יום", "location": "", "desc": "", "actorsList": [], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": ""}, {"id": "id31_mn1f6", "type": "scene", "time": "", "sceneNum": "25", "pages": "", "io": "ח", "dayNight": "יום", "location": "", "desc": "", "actorsList": [], "extrasList": [], "art": "", "wardrobePhotos": {}, "notes": "", "minutes": ""}], "specialNote": "", "sunrise": "", "sunset": "", "tempHigh": "", "tempLow": "", "totalDays": "4", "weatherDesc": "", "scenesCount": "2, 5, 11, 14, 18, 21, 26, 23, 24, 25"}], "prodCompany": "", "prodTitle": "FEMI -מאחורי החומה"};
+  const state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+  function migrateSceneItem(item) {
+    if (item.type === 'break') return;
+    if (!item.dayNight) item.dayNight = 'יום';
+    if (!Array.isArray(item.actorsList)) {
+      const raw = typeof item.actors === 'string' ? item.actors : '';
+      item.actorsList = raw.split(/\n|,/).map(s => s.replace(/^\s*\d+[.)]\s*/, '').trim()).filter(Boolean).map(name => ({ id: uid(), name }));
+    }
+    if (!Array.isArray(item.extrasList)) {
+      const raw = typeof item.extras === 'string' ? item.extras : '';
+      item.extrasList = raw.split(/\n|,/).map(s => s.replace(/^\s*\d+[.)]\s*/, '').trim()).filter(Boolean).map(name => ({ id: uid(), name }));
+    }
+    if (!item.wardrobePhotos || typeof item.wardrobePhotos !== 'object') item.wardrobePhotos = {};
+    delete item.artWardrobe;
+    delete item.actors;
+    delete item.extras;
+  }
+
+  function applyIncomingState(dataObj) {
+    Object.keys(state).forEach(k => delete state[k]);
+    Object.assign(state, dataObj);
+    if (!state.days || !state.days.length) state.days = [blankDay(1)];
+    if (!state.credits || !state.credits.length) state.credits = defaultRoles.map(blankCredit);
+    state.days.forEach(d => { if (d.schedule) d.schedule.forEach(migrateSceneItem); });
+    if (!state.activeDayId || !state.days.find(d => d.id === state.activeDayId)) state.activeDayId = state.days[0].id;
+  }
+
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) applyIncomingState(JSON.parse(raw));
+    } catch (e) { console.warn('local load failed', e); }
+  }
+
+  /* ---------- shared (collaborative) state via real Firestore ----------
+     Firebase is loaded lazily with a dynamic import() *inside* initDb(),
+     never as a top-level `import` on the page. A top-level import is
+     all-or-nothing: if that request fails for any reason (a network hiccup,
+     a slow connection, anything), the browser refuses to run the ENTIRE
+     script — not just the Firebase part, but every unrelated feature too
+     (day tabs, editing, PDF export), which is exactly what caused the
+     "empty project" symptom. Wrapping the load in try/catch here means a
+     Firebase failure only ever falls back to local-only mode — it can never
+     take the rest of the page down with it. */
+  let dbAvailable = false;
+  let dbWriteInFlight = false;
+  let dbWritePending = false;
+  let lastSyncedRev = -1; // highest revision we've either sent or received — never regress behind it
+  let fsSetDoc = null;     // set once Firebase loads successfully; used by writeToDbNow
+
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyD7_sJz_8mtvxFOG0ubQzdulXW8ELvvjqs",
+    authDomain: "ema-productions.firebaseapp.com",
+    projectId: "ema-productions",
+    storageBucket: "ema-productions.firebasestorage.app",
+    messagingSenderId: "308374284087",
+    appId: "1:308374284087:web:7ab5a97e66661e240e5cb2",
+    measurementId: "G-0F51JJEHVF"
+  };
+
+  function setSyncBadge(mode) {
+    const el2 = document.getElementById('syncBadge');
+    if (!el2) return;
+    if (mode === 'shared') {
+      el2.textContent = '🔗 עמוד שיתופי — כל מי שפותח את הקישור רואה את אותם נתונים, מתעדכן חי';
+      el2.className = 'sync-badge sync-shared';
+      el2.title = '';
+    } else if (mode === 'connecting') {
+      el2.textContent = '🔄 מתחבר לשיתוף…';
+      el2.className = 'sync-badge sync-local';
+      el2.title = '';
+    } else {
+      el2.textContent = '💻 מצב מקומי בלבד — נשמר רק בדפדפן הזה, לא משותף (לחצו כדי לנסות שוב)';
+      el2.className = 'sync-badge sync-local';
+      el2.title = 'לחצו כדי לנסות להתחבר שוב לשיתוף';
+    }
+  }
+
+  let dbRetryCount = 0;
+  let dbAttemptToken = 0; // bumped on every new attempt so a stale timed-out attempt can't act after a newer one already finished
+  const DB_MAX_RETRIES = 4; // a slow network or a cold CDN cache shouldn't strand the page in local-only mode after one bad attempt
+  const DB_RETRY_DELAYS_MS = [1500, 3000, 6000, 12000];
+  const DB_ATTEMPT_TIMEOUT_MS = 9000; // if the network call itself just hangs (never resolves, never rejects), don't wait forever — treat it as a failed attempt so retry/fallback can still kick in
+
+  function withTimeout(promise, ms) {
+    return new Promise((resolve, reject) => {
+      const t = setTimeout(() => reject(new Error('timed out')), ms);
+      promise.then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
+    });
+  }
+
+  async function attemptDbConnect() {
+    // Google's own gstatic.com CDN build ships "firebase-app.js" and
+    // "firebase-firestore.js" as a matched pair, pinned to the exact same
+    // internal @firebase/app version — that's what makes getFirestore() able
+    // to find the app that initializeApp() just registered. jsdelivr's "+esm"
+    // endpoint (tried first) independently resolved slightly different
+    // @firebase/app sub-versions for the app vs. firestore packages, so the
+    // two never saw the same registry and every connection attempt failed
+    // with "Service firestore is not available" — a real bug, not a network
+    // or CSP issue, confirmed via the browser console. (Note: gstatic.com is
+    // blocked by a Claude Artifact's security policy, so this only works once
+    // the page is hosted on its own real domain outside of Claude, as it now
+    // is.)
+    const [{ initializeApp }, { getFirestore, doc, getDoc, setDoc, onSnapshot }] = await Promise.all([
+      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js'),
+      import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js')
+    ]);
+    const fbApp = initializeApp(FIREBASE_CONFIG);
+    const fsDb = getFirestore(fbApp);
+    const stateDocRef = doc(fsDb, 'callsheet', 'state');
+    fsSetDoc = (data) => setDoc(stateDocRef, data);
+
+    const snap = await getDoc(stateDocRef);
+    if (snap.exists() && snap.data()) {
+      applyIncomingState(snap.data());
+      lastSyncedRev = state.__rev || 0;
+    } else {
+      state.__rev = 0;
+      await setDoc(stateDocRef, JSON.parse(JSON.stringify(state)));
+      lastSyncedRev = 0;
+    }
+    dbRetryCount = 0;
+    dbAvailable = true;
+    setSyncBadge('shared');
+    onSnapshot(stateDocRef, (snap2) => {
+      if (!snap2.exists()) return;
+      const data = snap2.data();
+      if (!data) return;
+      const incomingRev = data.__rev || 0;
+      // A revision at or below the highest we've sent/seen is either our own
+      // write echoing back, or a stale delivery superseded by a later local
+      // write — applying it would silently revert whatever just happened
+      // (a move, an upload, ...). Only ever move the revision forward.
+      if (incomingRev <= lastSyncedRev) return;
+      lastSyncedRev = incomingRev;
+      applyIncomingState(data);
+      bindTop(); renderCredits(); renderTabs(); renderPanels();
+    }, (err) => {
+      console.warn('db subscribe error', err);
+      dbAvailable = false;
+      setSyncBadge('local');
+    });
+  }
+
+  async function initDb() {
+    const myToken = ++dbAttemptToken;
+    setSyncBadge('connecting');
+    try {
+      await withTimeout(attemptDbConnect(), DB_ATTEMPT_TIMEOUT_MS);
+    } catch (e) {
+      console.warn('db init failed', e);
+      if (myToken !== dbAttemptToken) return; // a newer attempt (e.g. a manual retry click) has already taken over
+      dbAvailable = false;
+      fsSetDoc = null;
+      // a single failed or hung attempt (a slow CDN, a brief network drop on
+      // page load) shouldn't lock the page into "connecting…" or local-only
+      // forever — retry a few times with a growing delay before giving up
+      if (dbRetryCount < DB_MAX_RETRIES) {
+        const delay = DB_RETRY_DELAYS_MS[dbRetryCount] || DB_RETRY_DELAYS_MS[DB_RETRY_DELAYS_MS.length - 1];
+        dbRetryCount++;
+        setSyncBadge('connecting');
+        setTimeout(initDb, delay);
+      } else {
+        setSyncBadge('local');
+      }
+    }
+  }
+
+  function retryDbConnection() {
+    if (dbAvailable) return;
+    dbRetryCount = 0;
+    initDb();
+  }
+
+  async function writeToDbNow() {
+    if (!dbAvailable || !fsSetDoc) return;
+    if (dbWriteInFlight) { dbWritePending = true; return; }
+    dbWriteInFlight = true;
+    try {
+      const nextRev = (state.__rev || 0) + 1;
+      state.__rev = nextRev;
+      const snapshot = JSON.parse(JSON.stringify(state));
+      lastSyncedRev = nextRev; // claim this revision as ours before sending, so any echo of it (or anything older) is ignored
+      await fsSetDoc(snapshot);
+    } catch (e) {
+      console.warn('db write failed', e);
+      throw e;
+    } finally {
+      dbWriteInFlight = false;
+      if (dbWritePending) { dbWritePending = false; writeToDbNow(); }
+    }
+  }
+
+  let saveTimer = null;
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* best-effort local cache */ }
+    if (dbAvailable) {
+      writeToDbNow()
+        .then(() => { document.getElementById('saveStatus').textContent = 'משותף ✓'; })
+        .catch(() => { document.getElementById('saveStatus').textContent = 'שגיאת סנכרון'; });
+    } else {
+      document.getElementById('saveStatus').textContent = 'נשמר';
+    }
+  }
+  function scheduleSave() {
+    document.getElementById('saveStatus').textContent = 'שומר…';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(save, 400);
+  }
+
+  function el(tag, cls, attrs) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (attrs) Object.keys(attrs).forEach(k => { if (k === 'text') e.textContent = attrs[k]; else e.setAttribute(k, attrs[k]); });
+    return e;
+  }
+
+  /* ---------- auto-sizing form fields — text that overflows a fixed-size
+     input/textarea is simply invisible (scrolled out of view or clipped),
+     which is exactly the "text just disappears" symptom on screen, in print
+     and in the PDF/Word export. These keep the box growing with the content
+     instead, so what is on screen is exactly what gets exported. ---------- */
+  let _measureCanvas = null;
+  function measureTextWidth(text, font) {
+    if (!_measureCanvas) _measureCanvas = document.createElement('canvas');
+    const ctx = _measureCanvas.getContext('2d');
+    ctx.font = font;
+    return ctx.measureText(text || '').width;
+  }
+  function autosizeInput(inputEl, minPx) {
+    const cs = getComputedStyle(inputEl);
+    const font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+    const text = inputEl.value || inputEl.placeholder || '';
+    const w = measureTextWidth(text, font) + 18; // small buffer for padding/caret
+    inputEl.style.width = Math.max(minPx || 0, Math.ceil(w)) + 'px';
+  }
+  function autosizeTextarea(ta) {
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
+  }
+
+  /* ---------- top-level fields ---------- */
+  function bindTop() {
+    ['prodTitle','prodCompany'].forEach(id => {
+      const input = document.getElementById(id);
+      input.value = state[id] || '';
+      input.addEventListener('input', () => { state[id] = input.value; scheduleSave(); });
+    });
+  }
+
+  /* ---------- credits ---------- */
+  function renderCredits() {
+    const container = document.getElementById('creditsList');
+    container.innerHTML = '';
+    state.credits.forEach((c, idx) => {
+      const chip = el('div', 'credit-chip');
+      const roleInput = el('input', 'role');
+      roleInput.placeholder = 'תפקיד';
+      roleInput.value = c.role;
+      roleInput.addEventListener('input', () => { c.role = roleInput.value; autosizeInput(roleInput, 60); scheduleSave(); });
+      const nameInput = el('input', 'name');
+      nameInput.placeholder = 'שם';
+      nameInput.value = c.name;
+      nameInput.addEventListener('input', () => { c.name = nameInput.value; autosizeInput(nameInput, 70); scheduleSave(); });
+      const delBtn = el('button', '', { type: 'button', title: 'הסרה', text: '✕' });
+      delBtn.addEventListener('click', () => {
+        state.credits.splice(idx, 1);
+        renderCredits();
+        scheduleSave();
+      });
+      chip.appendChild(roleInput);
+      chip.appendChild(nameInput);
+      chip.appendChild(delBtn);
+      container.appendChild(chip);
+      autosizeInput(roleInput, 60);
+      autosizeInput(nameInput, 70);
+    });
+  }
+  document.getElementById('addCredit').addEventListener('click', () => {
+    state.credits.push(blankCredit(''));
+    renderCredits();
+    scheduleSave();
+  });
+
+  /* ---------- day tabs ---------- */
+  function renderTabs() {
+    const tabsEl = document.getElementById('dayTabs');
+    tabsEl.innerHTML = '';
+    state.days.forEach(day => {
+      const wrap = el('div', 'day-tab');
+      const btn = el('button', 'tab-btn' + (day.id === state.activeDayId ? ' active' : ''), { type: 'button', text: day.label || 'יום' });
+      btn.addEventListener('click', () => { state.activeDayId = day.id; renderTabs(); renderPanels(); });
+      const closeBtn = el('button', 'tab-close', { type: 'button', title: 'מחיקת יום', text: '✕' });
+      closeBtn.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        if (state.days.length <= 1) { await showAlert('חייב להישאר לפחות יום צילום אחד.'); return; }
+        const ok = await showConfirm('למחוק את ' + (day.label || 'היום') + '? הפעולה אינה הפיכה.');
+        if (!ok) return;
+        const idx = state.days.findIndex(d => d.id === day.id);
+        state.days.splice(idx, 1);
+        if (state.activeDayId === day.id) state.activeDayId = state.days[Math.max(0, idx - 1)].id;
+        renderTabs(); renderPanels(); scheduleSave();
+      });
+      wrap.appendChild(btn);
+      wrap.appendChild(closeBtn);
+      tabsEl.appendChild(wrap);
+    });
+    const addBtn = el('button', 'day-tab-add', { type: 'button', text: '+ הוספת יום' });
+    addBtn.addEventListener('click', () => {
+      const n = state.days.length + 1;
+      const nd = blankDay(n);
+      nd.totalDays = String(n);
+      state.days.forEach(d => d.totalDays = String(n));
+      state.days.push(nd);
+      state.activeDayId = nd.id;
+      renderTabs(); renderPanels(); scheduleSave();
+    });
+    tabsEl.appendChild(addBtn);
+  }
+
+  /* ---------- day panel rendering ---------- */
+  const simpleDayFields = ['dayNum','totalDays','date','generalCall','sunrise','sunset','mainLocation','parking','hospital','scenesCount','notes'];
+
+  const scheduleColumns = [
+    { key: 'minutes', label: 'דקות', cls: 'col-minutes', type: 'minutes' },
+    { key: 'time', label: 'שעה', cls: 'col-time', type: 'computed' },
+    { key: 'sceneNum', label: 'סצנה מס\'', cls: 'col-scene', type: 'text' },
+    { key: 'pages', label: 'עמודים', cls: 'col-scene', type: 'text', placeholder: '2/8' },
+    { key: 'io', label: 'פ/ח', cls: 'col-io', type: 'io' },
+    { key: 'dayNight', label: 'יום/לילה', cls: 'col-io', type: 'daynight' },
+    { key: 'location', label: 'לוקיישן', cls: 'col-loc', type: 'textarea' },
+    { key: 'desc', label: 'תאור הסצנה', cls: 'col-desc', type: 'textarea' },
+    { key: 'actorsList', label: 'שחקנים', cls: 'col-actors', type: 'actors' },
+    { key: 'extrasList', label: 'ניצבים', cls: 'col-actors', type: 'extras' },
+    { key: 'art', label: 'ארט', cls: 'col-art', type: 'textarea' },
+    { key: 'wardrobe', label: 'הלבשה', cls: 'col-wardrobe', type: 'wardrobe' },
+    { key: 'notes', label: 'הערות', cls: 'col-notes', type: 'textarea' }
+  ];
+
+  const castFields = [
+    { key: 'num', label: '#', placeholder: '1' },
+    { key: 'name', label: 'שם שחקן/ית', placeholder: '' },
+    { key: 'role', label: 'תפקיד', placeholder: 'דמות' },
+    { key: 'call', label: 'קריאה', type: 'time' },
+    { key: 'pickup', label: 'איסוף', placeholder: 'שעה/מקום' }
+  ];
+
+  function renderPanels() {
+    const host = document.getElementById('dayPanels');
+    host.innerHTML = '';
+    state.days.forEach(day => {
+      const panel = el('div', 'day-panel' + (day.id === state.activeDayId ? ' active' : ''));
+      panel.dataset.dayId = day.id;
+      panel.appendChild(buildDayPanel(day));
+      host.appendChild(panel);
+    });
+    // textareas built while their fragment was still detached from the
+    // document (the very first render, or right after loading a backup)
+    // measure their own scrollHeight as 0, so give them one more pass now
+    // that everything is actually attached and has real layout.
+    host.querySelectorAll('textarea').forEach(autosizeTextarea);
+  }
+
+  function fieldBlock(labelText, inputEl) {
+    const wrap = el('div', 'field');
+    const label = el('label', '', { text: labelText });
+    wrap.appendChild(label);
+    wrap.appendChild(inputEl);
+    return wrap;
+  }
+
+  function bindSimple(day, key, inputEl) {
+    inputEl.value = day[key] || '';
+    inputEl.addEventListener('input', () => { day[key] = inputEl.value; scheduleSave(); if (key === 'label') renderTabs(); });
+  }
+
+  function buildDayPanel(day) {
+    const frag = document.createDocumentFragment();
+
+    // day meta card
+    const metaCard = el('section', 'card');
+    const metaHead = el('h2');
+    const labelInput = el('input', 'mono-field', { style: 'font-weight:700;font-size:15px;max-width:160px;border-bottom:none;padding:0;' });
+    labelInput.value = day.label;
+    labelInput.addEventListener('input', () => { day.label = labelInput.value; renderTabs(); scheduleSave(); });
+    metaHead.appendChild(labelInput);
+    const badge = el('span', 'day-badge', { text: 'יום ' + (day.dayNum || '?') + ' מתוך ' + (day.totalDays || '?') });
+    metaHead.appendChild(badge);
+    metaCard.appendChild(metaHead);
+
+    const dayActions = el('div', 'day-actions');
+    const dupBtn = el('button', 'btn-small', { type: 'button', text: '⧉ שכפול יום (כולל לוח צילומים)' });
+    dupBtn.addEventListener('click', () => {
+      const clone = JSON.parse(JSON.stringify(day));
+      clone.id = uid();
+      clone.label = 'יום ' + (state.days.length + 1);
+      clone.dayNum = String(state.days.length + 1);
+      clone.schedule.forEach(r => r.id = uid());
+      clone.cast.forEach(r => r.id = uid());
+      const n = state.days.length + 1;
+      state.days.forEach(d => d.totalDays = String(n));
+      clone.totalDays = String(n);
+      state.days.push(clone);
+      state.activeDayId = clone.id;
+      renderTabs(); renderPanels(); scheduleSave();
+    });
+    dayActions.appendChild(dupBtn);
+    metaCard.appendChild(dayActions);
+
+    const g1 = el('div', 'grid2');
+    ['dayNum','totalDays','date','generalCall'].forEach(key => {
+      const labels = { dayNum: 'יום צילום מס\'', totalDays: 'מתוך סה"כ ימים', date: 'תאריך', generalCall: 'קריאה כללית' };
+      const types = { date: 'date', generalCall: 'time' };
+      const input = el('input', types[key] === 'time' ? 'mono-field' : '', { type: types[key] || 'text' });
+      bindSimple(day, key, input);
+      if (key === 'dayNum' || key === 'totalDays') {
+        input.addEventListener('input', () => { badge.textContent = 'יום ' + (day.dayNum || '?') + ' מתוך ' + (day.totalDays || '?'); });
+      }
+      g1.appendChild(fieldBlock(labels[key], input));
+    });
+    metaCard.appendChild(g1);
+
+    const g2 = el('div', 'grid2');
+    g2.style.marginTop = '14px';
+    [['sunrise','זריחה','time'],['sunset','שקיעה','time']].forEach(([key,label,type]) => {
+      const input = el('input', type==='time' ? 'mono-field' : '', { type });
+      bindSimple(day, key, input);
+      g2.appendChild(fieldBlock(label, input));
+    });
+    // "סצנות" is filled in automatically from the scene numbers typed into
+    // the schedule table below — no need to type the same numbers twice
+    const scenesCountDisplay = el('div', 'computed-time', { text: '—' });
+    g2.appendChild(fieldBlock('סצנות (סה"כ ליום) — לפי לוח הצילומים', scenesCountDisplay));
+    metaCard.appendChild(g2);
+    frag.appendChild(metaCard);
+
+    // locations card
+    const locCard = el('section', 'card');
+    locCard.appendChild(el('h2', '', { text: 'לוקיישנים' }));
+    const gLoc = el('div', 'grid2');
+    [['mainLocation','לוקיישן ראשי'],['parking','נקודת התכנסות / חניה']].forEach(([key,label]) => {
+      const input = el('input', '', { type: 'text' });
+      bindSimple(day, key, input);
+      gLoc.appendChild(fieldBlock(label, input));
+    });
+    locCard.appendChild(gLoc);
+    const hospWrap = el('div', 'field'); hospWrap.style.marginTop = '14px';
+    const hospInput = el('input', '', { type: 'text' });
+    bindSimple(day, 'hospital', hospInput);
+    hospWrap.appendChild(el('label', '', { text: 'בית חולים קרוב' }));
+    hospWrap.appendChild(hospInput);
+    locCard.appendChild(hospWrap);
+    frag.appendChild(locCard);
+
+    // cast card
+    const castCard = el('section', 'card');
+    const castHead = el('h2');
+    castHead.appendChild(document.createTextNode('שחקנים '));
+    castHead.appendChild(el('span', 'hint', { text: 'קריאה אישית לכל שחקן/ית' }));
+    castCard.appendChild(castHead);
+    const castRowsEl = el('div', 'rows');
+    castCard.appendChild(castRowsEl);
+    function renderCast() {
+      castRowsEl.innerHTML = '';
+      day.cast.forEach((item, idx) => {
+        const row = buildSimpleRow(item, castFields, 'cast', () => {
+          day.cast.splice(idx, 1);
+          if (day.cast.length === 0) day.cast.push(blankCast());
+          renderCast(); scheduleSave();
+        });
+        castRowsEl.appendChild(row);
+      });
+    }
+    renderCast();
+    const addCastBtn = el('button', 'add-row', { type: 'button', text: '+ הוספת שחקן/ית' });
+    addCastBtn.addEventListener('click', () => { day.cast.push(blankCast()); renderCast(); scheduleSave(); });
+    castCard.appendChild(addCastBtn);
+    frag.appendChild(castCard);
+
+    // schedule card (marked with "schedule-section" so PDF export can force a page break here)
+    const schedCard = el('section', 'card schedule-section');
+    const schedHead = el('h2');
+    schedHead.appendChild(document.createTextNode('לוח צילומים '));
+    schedHead.appendChild(el('span', 'hint', { text: 'העמודה "שעה" מחושבת אוטומטית משעת ההתחלה + הדקות בכל שורה' }));
+    schedCard.appendChild(schedHead);
+
+    const startRow = el('div', 'grid3');
+    startRow.style.marginBottom = '14px';
+    const startInput = el('input', 'mono-field', { type: 'time' });
+    startInput.value = day.scheduleStart || '';
+    startInput.addEventListener('input', () => { day.scheduleStart = startInput.value; updateComputedTimes(); scheduleSave(); });
+    startRow.appendChild(fieldBlock('שעת התחלת לוח הצילומים', startInput));
+    const endTimeDisplay = el('div', 'computed-time', { text: '—' });
+    startRow.appendChild(fieldBlock('שעת סיום (מחושבת אוטומטית)', endTimeDisplay));
+    const totalDurationDisplay = el('div', 'computed-time', { text: '—' });
+    startRow.appendChild(fieldBlock('סה"כ שעות צילום (מחושב אוטומטית)', totalDurationDisplay));
+    schedCard.appendChild(startRow);
+
+    const tableScroll = el('div', 'table-scroll');
+    const table = el('table', 'schedule');
+    const thead = el('thead');
+    const headRow = el('tr');
+    // table-layout:fixed takes each column's width from the HEADER row's
+    // cells, not the body's — the <th>s here were missing the col.cls width
+    // classes the <td>s already had, so every column silently got squeezed to
+    // the same equal share of the table's width instead of its real declared
+    // size (48px for minutes vs. 210px for the description, etc.). That's
+    // what looked like content "leaking" into the wrong column once the grid
+    // borders made the mismatch visible.
+    scheduleColumns.forEach(col => headRow.appendChild(el('th', col.cls, { text: col.label })));
+    headRow.appendChild(el('th', 'col-actions', { text: '' }));
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+    const tbody = el('tbody');
+    table.appendChild(tbody);
+    tableScroll.appendChild(table);
+    schedCard.appendChild(tableScroll);
+
+    function updateComputedTimes() {
+      // Lightweight refresh: recompute cumulative times and patch just the
+      // read-only time cells in place, so typing in a minutes field never
+      // loses focus (a full rebuild would recreate the input mid-keystroke).
+      const times = computeScheduleTimes(day);
+      tbody.querySelectorAll('[data-time-idx]').forEach(elx => {
+        const i = parseInt(elx.getAttribute('data-time-idx'), 10);
+        elx.textContent = formatComputedRange(times[i]);
+      });
+      updateDayTotals();
+    }
+
+    function updateDayTotals() {
+      const totals = computeDayTotals(day);
+      endTimeDisplay.textContent = totals.endTime != null ? formatMinutesAsTime(totals.endTime) : '—';
+      totalDurationDisplay.textContent = formatDurationHM(totals.totalMin);
+      scenesCountDisplay.textContent = computeScenesSummary(day);
+      day.scenesCount = scenesCountDisplay.textContent; // keep the saved/exported value in sync too
+    }
+
+    function buildNumberedListCell(item, listKey, opts) {
+      opts = opts || {};
+      const wrap = el('div', 'actors-cell');
+      const list = item[listKey];
+      list.forEach((entry, idx) => {
+        const rowEl = el('div', 'actor-chip');
+        const badge = el('span', 'actor-num', { text: String(idx + 1) });
+        const nameInput = el('input', 'actor-name-input', { type: 'text', placeholder: opts.placeholder || '' });
+        nameInput.value = entry.name || '';
+        nameInput.addEventListener('input', () => { entry.name = nameInput.value; scheduleSave(); });
+        const rm = el('button', 'actor-rm', { type: 'button', title: 'הסרה', text: '✕' });
+        rm.addEventListener('click', () => {
+          list.splice(idx, 1);
+          if (opts.onRemove) opts.onRemove(entry);
+          renderSchedule();
+          scheduleSave();
+        });
+        rowEl.appendChild(badge);
+        rowEl.appendChild(nameInput);
+        rowEl.appendChild(rm);
+        wrap.appendChild(rowEl);
+      });
+      const addBtn = el('button', 'actor-add', { type: 'button', text: opts.addLabel || '+ הוספה' });
+      addBtn.addEventListener('click', () => {
+        list.push({ id: uid(), name: '' });
+        renderSchedule();
+        scheduleSave();
+      });
+      wrap.appendChild(addBtn);
+      return wrap;
+    }
+
+    function buildActorsCell(item, tr) {
+      return buildNumberedListCell(item, 'actorsList', {
+        placeholder: 'שם שחקן',
+        addLabel: '+ שחקן',
+        onRemove: (actor) => {
+          if (item.wardrobePhotos[actor.id]) {
+            deletePhoto(item.wardrobePhotos[actor.id]).catch(() => {});
+            delete item.wardrobePhotos[actor.id];
+          }
+        }
+      });
+    }
+
+    function buildExtrasCell(item) {
+      return buildNumberedListCell(item, 'extrasList', { placeholder: 'תיאור / מספר ניצבים', addLabel: '+ ניצב' });
+    }
+
+    function buildWardrobeCell(item, tr) {
+      const wrap = el('div', 'wardrobe-cell');
+      if (!item.actorsList.length) {
+        wrap.appendChild(el('div', 'wardrobe-hint', { text: 'הוסיפו שחקנים בעמודה הסמוכה' }));
+        return wrap;
+      }
+      item.actorsList.forEach((actor, aIdx) => {
+        const box = el('div', 'wardrobe-box');
+        const thumbWrap = el('div', 'wardrobe-thumb', { title: 'לחיצה להעלאת/החלפת תמונה' });
+        const numBadge = el('span', 'wardrobe-num', { text: String(aIdx + 1) });
+        const img = el('img', '', { style: 'display:none;', alt: 'תמונת הלבשה' });
+        const placeholder = el('span', 'wardrobe-placeholder', { text: '📷' });
+        thumbWrap.appendChild(img);
+        thumbWrap.appendChild(placeholder);
+        thumbWrap.appendChild(numBadge);
+        const photoKey = item.wardrobePhotos[actor.id];
+        if (photoKey) {
+          getPhoto(photoKey).then(dataUrl => {
+            if (dataUrl) { img.src = dataUrl; img.style.display = 'block'; placeholder.style.display = 'none'; }
+          }).catch(() => {});
+        }
+        const fileInput = el('input', 'wardrobe-file', { type: 'file', accept: 'image/*', style: 'display:none;' });
+        fileInput.addEventListener('change', () => {
+          const file = fileInput.files && fileInput.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            const dataUrl = reader.result;
+            const key = item.id + '_' + actor.id;
+            savePhoto(key, dataUrl).then(() => {
+              item.wardrobePhotos[actor.id] = key;
+              img.src = dataUrl; img.style.display = 'block'; placeholder.style.display = 'none';
+              scheduleSave();
+            }).catch(() => { showAlert('שגיאה בשמירת התמונה — ייתכן שאין מקום פנוי בדפדפן.'); });
+          };
+          reader.readAsDataURL(file);
+        });
+        thumbWrap.addEventListener('click', () => fileInput.click());
+        box.appendChild(thumbWrap);
+        box.appendChild(fileInput);
+        wrap.appendChild(box);
+      });
+      return wrap;
+    }
+
+    function renderSchedule() {
+      tbody.innerHTML = '';
+      const computedTimes = computeScheduleTimes(day);
+      day.schedule.forEach((item, idx) => {
+        const tr = el('tr', item.type === 'break' ? 'break-row' : 'scene-row');
+        if (item.type === 'break') {
+          const td = el('td');
+          td.colSpan = scheduleColumns.length;
+          const innerWrap = el('div', 'break-inner');
+          const timeDisplay = el('span', 'break-time', { text: formatComputedRange(computedTimes[idx]), 'data-time-idx': idx });
+          const labelInput2 = el('input', 'break-label', { placeholder: 'הפסקת צהריים / הקמות תאורה / הגעת צוות...' });
+          labelInput2.value = item.label;
+          labelInput2.addEventListener('input', () => { item.label = labelInput2.value; scheduleSave(); });
+          const minInput = el('input', 'break-minutes', { placeholder: 'דק\'' });
+          minInput.value = item.minutes;
+          minInput.addEventListener('input', () => { item.minutes = minInput.value; updateComputedTimes(); scheduleSave(); });
+          innerWrap.appendChild(minInput);
+          innerWrap.appendChild(timeDisplay);
+          innerWrap.appendChild(labelInput2);
+          td.appendChild(innerWrap);
+          tr.appendChild(td);
+        } else {
+          scheduleColumns.forEach(col => {
+            const td = el('td', col.cls);
+            let inputEl;
+            if (col.type === 'io') {
+              inputEl = el('select', 'io-select ' + (item.io === 'ח' ? 'io-ext' : 'io-int'));
+              ['ח','פ'].forEach(v => {
+                const opt = el('option', '', { value: v, text: v });
+                if (item.io === v) opt.selected = true;
+                inputEl.appendChild(opt);
+              });
+              inputEl.addEventListener('change', () => {
+                item.io = inputEl.value;
+                inputEl.className = 'io-select ' + (inputEl.value === 'ח' ? 'io-ext' : 'io-int');
+                scheduleSave();
+              });
+            } else if (col.type === 'daynight') {
+              inputEl = el('select', 'dn-select ' + (item.dayNight === 'לילה' ? 'dn-night' : 'dn-day'));
+              ['יום','לילה'].forEach(v => {
+                const opt = el('option', '', { value: v, text: v });
+                if (item.dayNight === v) opt.selected = true;
+                inputEl.appendChild(opt);
+              });
+              inputEl.addEventListener('change', () => {
+                item.dayNight = inputEl.value;
+                inputEl.className = 'dn-select ' + (inputEl.value === 'לילה' ? 'dn-night' : 'dn-day');
+                scheduleSave();
+              });
+            } else if (col.type === 'textarea') {
+              inputEl = el('textarea', '');
+              inputEl.value = item[col.key] || '';
+              inputEl.addEventListener('input', () => { item[col.key] = inputEl.value; autosizeTextarea(inputEl); scheduleSave(); });
+            } else if (col.type === 'minutes') {
+              inputEl = el('input', 'minutes-input', { type: 'text', placeholder: 'דק\'' });
+              inputEl.value = item[col.key] || '';
+              inputEl.addEventListener('input', () => { item[col.key] = inputEl.value; updateComputedTimes(); scheduleSave(); });
+            } else if (col.type === 'computed') {
+              inputEl = el('div', 'computed-time', { text: formatComputedRange(computedTimes[idx]), 'data-time-idx': idx });
+            } else if (col.type === 'actors') {
+              inputEl = buildActorsCell(item, tr);
+            } else if (col.type === 'extras') {
+              inputEl = buildExtrasCell(item);
+            } else if (col.type === 'wardrobe') {
+              inputEl = buildWardrobeCell(item, tr);
+            } else {
+              inputEl = el('input', '', { type: 'text', placeholder: col.placeholder || '' });
+              inputEl.value = item[col.key] || '';
+              inputEl.addEventListener('input', () => {
+                item[col.key] = inputEl.value;
+                if (col.key === 'sceneNum') updateDayTotals(); // keeps the day-meta "סצנות" summary in sync
+                scheduleSave();
+              });
+            }
+            td.appendChild(inputEl);
+            tr.appendChild(td);
+          });
+        }
+        // actions cell
+        const actionsTd = el('td', 'col-actions');
+        const actionsWrap = el('div', 'row-actions-cell');
+        const upBtn = el('button', 'icon-btn move', { type: 'button', title: 'הזזה למעלה', text: '↑' });
+        upBtn.addEventListener('click', () => {
+          if (idx === 0) return;
+          [day.schedule[idx-1], day.schedule[idx]] = [day.schedule[idx], day.schedule[idx-1]];
+          renderSchedule(); scheduleSave();
+        });
+        const downBtn = el('button', 'icon-btn move', { type: 'button', title: 'הזזה למטה', text: '↓' });
+        downBtn.addEventListener('click', () => {
+          if (idx === day.schedule.length - 1) return;
+          [day.schedule[idx+1], day.schedule[idx]] = [day.schedule[idx], day.schedule[idx+1]];
+          renderSchedule(); scheduleSave();
+        });
+        const delBtn = el('button', 'icon-btn', { type: 'button', title: 'הסרה', text: '✕' });
+        delBtn.addEventListener('click', () => {
+          day.schedule.splice(idx, 1);
+          if (day.schedule.length === 0) day.schedule.push(blankScene());
+          renderSchedule(); scheduleSave();
+        });
+        actionsWrap.appendChild(upBtn);
+        actionsWrap.appendChild(downBtn);
+        actionsWrap.appendChild(delBtn);
+        actionsTd.appendChild(actionsWrap);
+        tr.appendChild(actionsTd);
+        tbody.appendChild(tr);
+      });
+      updateDayTotals();
+    }
+    renderSchedule();
+
+    const addGroup = el('div', 'add-row-group');
+    const addSceneBtn = el('button', 'add-row', { type: 'button', text: '+ הוספת סצנה' });
+    addSceneBtn.addEventListener('click', () => { day.schedule.push(blankScene()); renderSchedule(); scheduleSave(); });
+    const addBreakBtn = el('button', 'add-row', { type: 'button', text: '+ הוספת הפסקה / אירוע (הקמת תאורה, ארוחה וכו\')' });
+    addBreakBtn.addEventListener('click', () => { day.schedule.push(blankBreak()); renderSchedule(); scheduleSave(); });
+    addGroup.appendChild(addSceneBtn);
+    addGroup.appendChild(addBreakBtn);
+    schedCard.appendChild(addGroup);
+    frag.appendChild(schedCard);
+
+    // notes card
+    const notesCard = el('section', 'card');
+    notesCard.appendChild(el('h2', '', { text: 'הערות כלליות' }));
+    const notesArea = el('textarea', '', { placeholder: 'הנחיות בטיחות, קוד לבוש, הערות מיוחדות ליום הצילום...' });
+    bindSimple(day, 'notes', notesArea);
+    notesArea.addEventListener('input', () => autosizeTextarea(notesArea));
+    notesCard.appendChild(notesArea);
+    frag.appendChild(notesCard);
+
+    return frag;
+  }
+
+  function buildSimpleRow(item, fieldsSpec, rowClass, onDelete) {
+    const row = el('div', 'row ' + rowClass);
+    fieldsSpec.forEach(spec => {
+      const input = el('input', '', { type: spec.type || 'text', placeholder: spec.placeholder || '' });
+      input.value = item[spec.key] || '';
+      input.addEventListener('input', () => { item[spec.key] = input.value; scheduleSave(); });
+      row.appendChild(fieldBlock(spec.label, input));
+    });
+    const delBtn = el('button', 'icon-btn', { type: 'button', title: 'הסרה', text: '✕' });
+    delBtn.addEventListener('click', onDelete);
+    row.appendChild(delBtn);
+    return row;
+  }
+
+  /* ---------- backup: export / import (full state + photos, as one JSON file) ---------- */
+  function collectAllPhotoKeys() {
+    const keys = new Set();
+    state.days.forEach(d => (d.schedule || []).forEach(item => {
+      if (item.wardrobePhotos) Object.values(item.wardrobePhotos).forEach(k => k && keys.add(k));
+    }));
+    return Array.from(keys);
+  }
+
+  async function exportBackup() {
+    const statusEl = document.getElementById('saveStatus');
+    try {
+      statusEl.textContent = 'מכין גיבוי…';
+      const keys = collectAllPhotoKeys();
+      const photos = {};
+      for (const k of keys) {
+        const dataUrl = await getPhoto(k);
+        if (dataUrl) photos[k] = dataUrl;
+      }
+      const exportObj = { kind: 'callsheet-backup', version: 2, exportedAt: new Date().toISOString(), state, photos };
+      const blob = new Blob([JSON.stringify(exportObj)], { type: 'application/json' });
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const safeTitle = (state.prodTitle || 'קולשיט').replace(/[^\u0590-\u05FFa-zA-Z0-9]+/g, '_') || 'קולשיט';
+      await saveFile({ filename: 'גיבוי_' + safeTitle + '_' + dateStr + '.json', data: blob });
+      statusEl.textContent = 'גיבוי נשמר';
+    } catch (e) {
+      if (e && e.code === 'declined') { statusEl.textContent = 'בוטל'; return; }
+      console.error('export failed', e);
+      await showAlert('שגיאה בהכנת קובץ הגיבוי.');
+      statusEl.textContent = 'שגיאה';
+    }
+  }
+
+  function getActiveDay() {
+    return state.days.find(d => d.id === state.activeDayId) || state.days[0];
+  }
+
+  function getRowBoundaries(container, scale) {
+    const rect = container.getBoundingClientRect();
+    const boundaries = new Set();
+    container.querySelectorAll('tr, section.card').forEach(elx => {
+      const r = elx.getBoundingClientRect();
+      boundaries.add(Math.round((r.top - rect.top) * scale));
+      boundaries.add(Math.round((r.bottom - rect.top) * scale));
+    });
+    return Array.from(boundaries).sort((a, b) => a - b);
+  }
+
+  // Slices one captured canvas across as many PDF pages as it needs, snapping
+  // each break to a row/card boundary so nothing is cut in half. pageFormat
+  // (if given) is used for every new page this call adds, so the schedule's
+  // pages can be physically wider than the cover's pages — that is what keeps
+  // its columns close to full size instead of shrinking to match the cover.
+  function addCanvasPages(pdf, canvas, rowBoundaries, usableW, usableH, pagePixelHeight, scale, margin, isFirstPageOfDoc, pageFormat) {
+    // leave a small safety margin below the theoretical per-page capacity —
+    // html2canvas renders wrapped text through its own internal cloning
+    // pipeline, which can differ from our own DOM measurements by a few
+    // pixels, and without this slack a row that "just barely" fits can still
+    // end up sliced across the page boundary
+    const SAFE_PX = Math.round(pagePixelHeight * 0.03);
+    let renderedPx = 0;
+    let pageIndex = 0;
+    while (renderedPx < canvas.height) {
+      let sliceEnd = Math.min(renderedPx + pagePixelHeight - SAFE_PX, canvas.height);
+      const isLastSlice = sliceEnd >= canvas.height;
+      if (!isLastSlice) {
+        // snap the break to the last row/card boundary that fits — a whole
+        // row/scene that doesn't fit is pushed entirely to the next page
+        // (leaving blank space below it here) rather than being sliced in
+        // half. The lower bound only skips a boundary that lands right on
+        // the page's own top edge (which would produce a near-zero-height
+        // page); it must stay small or a real, closer boundary gets missed
+        // and the code falls through to a hard, mid-row cut instead.
+        const candidates = rowBoundaries.filter(b => b > renderedPx + 6 && b <= sliceEnd);
+        if (candidates.length) sliceEnd = candidates[candidates.length - 1];
+        // if no boundary at all fits in this page, the row/card itself is
+        // taller than one full page (very long text) — there is truly no
+        // page break that avoids cutting it, so it is left to spill over
+      }
+      const sliceHeightPx = sliceEnd - renderedPx;
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = sliceHeightPx;
+      const sctx = sliceCanvas.getContext('2d');
+      sctx.fillStyle = '#ffffff';
+      sctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+      sctx.drawImage(canvas, 0, renderedPx, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
+      const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.92);
+      if (!(isFirstPageOfDoc && pageIndex === 0)) {
+        if (pageFormat) pdf.addPage(pageFormat, 'landscape'); else pdf.addPage();
+      }
+      const sliceHeightPt = sliceHeightPx / scale;
+      pdf.addImage(sliceData, 'JPEG', margin, margin, usableW, sliceHeightPt);
+      renderedPx = sliceEnd;
+      pageIndex++;
+    }
+  }
+
+  // Adds one full page containing exactly one image, scaled up (keeping its
+  // aspect ratio) to fill as much of the page as possible — used whenever a
+  // canvas is already known to fit on one page, so it never prints tiny and
+  // half-empty.
+  function addFittedImagePage(pdf, canvas, pageW, pageH, margin, isFirstPageOfDoc, pageFormat) {
+    const usableW = pageW - margin * 2;
+    const usableH = pageH - margin * 2;
+    const PX_TO_PT = 0.375; // canvas was captured at scale:2 (2 canvas px per CSS px), and 1 CSS px = 0.75pt
+    const naturalW = canvas.width * PX_TO_PT;
+    const naturalH = canvas.height * PX_TO_PT;
+    const containScale = Math.min(usableW / naturalW, usableH / naturalH);
+    const finalW = naturalW * containScale;
+    const finalH = naturalH * containScale;
+    const offsetX = margin + (usableW - finalW) / 2;
+    const offsetY = margin + (usableH - finalH) / 2;
+    if (!isFirstPageOfDoc) {
+      if (pageFormat) pdf.addPage(pageFormat, 'landscape'); else pdf.addPage();
+    }
+    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+    pdf.addImage(imgData, 'JPEG', offsetX, offsetY, finalW, finalH);
+  }
+
+  // Places a captured canvas onto page(s) sized pageW x pageH. When the whole
+  // canvas fits on a single page, it fills as much of the page as possible
+  // (see addFittedImagePage) instead of leaving blank space below/beside it.
+  // Content that needs more than one page falls back to width-fit slicing,
+  // one row/card at a time.
+  function renderCanvasToPdf(pdf, canvas, rowBoundaries, pageW, pageH, margin, isFirstPageOfDoc, pageFormat) {
+    const usableW = pageW - margin * 2;
+    const usableH = pageH - margin * 2;
+    const widthFitScale = canvas.width / usableW; // canvas px per pt at full page width
+    const heightAtWidthFit = canvas.height / widthFitScale;
+
+    if (heightAtWidthFit <= usableH) {
+      addFittedImagePage(pdf, canvas, pageW, pageH, margin, isFirstPageOfDoc, pageFormat);
+      return;
+    }
+
+    const pagePixelHeight = Math.floor(usableH * widthFitScale);
+    addCanvasPages(pdf, canvas, rowBoundaries, usableW, usableH, pagePixelHeight, widthFitScale, margin, isFirstPageOfDoc, pageFormat);
+  }
+
+  // html2canvas paints <input>/<textarea>/<select> using its own built-in
+  // form-control renderer, which does not reliably wrap text to the box or
+  // respect the page's right-to-left direction — that is what made typed
+  // Hebrew text overflow past its box, or come out reading left-to-right,
+  // in the exported PDF even though it looks correct on screen. Swapping
+  // every field for a plain styled <div> with the same text right before
+  // the screenshot lets html2canvas lay it out as ordinary text instead,
+  // which it wraps and directs correctly.
+  //
+  // This is done on the LIVE page (temporarily), not via html2canvas's
+  // "onclone" hook — a div can render at a very slightly different height
+  // than the textarea it replaces (line-height/padding rounding), and doing
+  // the swap only inside html2canvas's internal clone meant our own
+  // row-boundary measurements (taken from the live textareas) no longer
+  // matched the row heights actually rendered into the picture, which is
+  // exactly what let a row get sliced across two pages. Swapping the live
+  // DOM first means both the measurement and the screenshot see the same
+  // element. Returns the list of {div, original} swaps to undo afterward.
+  function swapFieldsForStaticText(rootEl) {
+    const swaps = [];
+    rootEl.querySelectorAll('input, textarea, select').forEach(fieldEl => {
+      let text = '';
+      if (fieldEl.tagName === 'SELECT') {
+        const opt = fieldEl.options[fieldEl.selectedIndex];
+        text = opt ? opt.textContent : '';
+      } else {
+        text = fieldEl.value || '';
+      }
+      const cs = getComputedStyle(fieldEl);
+      const div = document.createElement('div');
+      div.textContent = text;
+      div.className = fieldEl.className;
+      div.style.boxSizing = 'border-box';
+      div.style.width = cs.width;
+      div.style.minHeight = cs.height;
+      div.style.font = cs.font;
+      div.style.fontWeight = cs.fontWeight;
+      div.style.color = cs.color;
+      div.style.background = cs.backgroundColor;
+      // set border sides individually (not the "border" shorthand) since a
+      // few fields (e.g. the credit-chip role field) only style one side —
+      // the shorthand's computed value is unreliable when sides differ
+      div.style.borderTop = cs.borderTop;
+      div.style.borderRight = cs.borderRight;
+      div.style.borderBottom = cs.borderBottom;
+      div.style.borderLeft = cs.borderLeft;
+      div.style.borderRadius = cs.borderRadius;
+      div.style.padding = cs.padding;
+      div.style.textAlign = cs.textAlign;
+      div.style.direction = 'rtl';
+      div.style.unicodeBidi = 'plaintext';
+      div.style.whiteSpace = fieldEl.tagName === 'TEXTAREA' ? 'pre-wrap' : 'normal';
+      div.style.overflowWrap = 'break-word';
+      div.style.wordBreak = 'break-word';
+      fieldEl.replaceWith(div);
+      swaps.push({ div, original: fieldEl });
+    });
+    return swaps;
+  }
+  function restoreFieldsFromStaticText(swaps) {
+    // restore in reverse so nested swaps (rare) unwind cleanly
+    for (let i = swaps.length - 1; i >= 0; i--) {
+      const { div, original } = swaps[i];
+      if (div.parentNode) div.replaceWith(original);
+    }
+  }
+
+  /* ---------- PDF export: screenshot the active day (like print) into a real PDF file ----------
+     The cover (credits, day info, locations, cast, notes) and the shooting
+     schedule are captured as two SEPARATE images, each at its own natural
+     width. The schedule then gets its own, wider page size in the PDF —
+     scaled to the table's real width instead of squeezed down to match the
+     narrower cover cards — so its columns stay close to full size and
+     readable instead of shrinking to fit alongside everything else. */
+  async function exportPDF() {
+    const statusEl = document.getElementById('saveStatus');
+    try {
+      statusEl.textContent = 'מכין PDF…';
+
+      await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', () => window.html2canvas);
+      await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', () => window.jspdf);
+
+      const prevTheme = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.body.classList.add('pdf-export-mode');
+      await new Promise(r => setTimeout(r, 50)); // let styles settle
+
+      const { jsPDF } = window.jspdf;
+      const margin = 32; // pt — keeps real whitespace around the content on every page
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+      const coverPageW = pdf.internal.pageSize.getWidth();
+      const coverPageH = pdf.internal.pageSize.getHeight();
+
+      const panel = document.querySelector('.day-panel.active');
+      const scheduleEl = panel.querySelector('.schedule-section');
+      // The production title and the "אנשי מפתח" credits card live above the
+      // day tabs, shared by every day — not inside each day-panel — so
+      // capturing just `panel` (as earlier versions did) always left them
+      // out of the export. `.wrap` holds all of it: the title header, the
+      // credits card, and (via #dayPanels) the active day panel — with every
+      // *other* day panel already hidden by the .day-panel/.day-panel.active
+      // CSS rule, and the day tabs themselves hidden by pdf-export-mode.
+      const coverRoot = document.querySelector('.wrap');
+
+      // ---- capture 1: title + credits + the active day's info cards —
+      // everything except the schedule table (the "cover") ----
+      const prevScheduleDisplay = scheduleEl.style.display;
+      scheduleEl.style.display = 'none';
+      const coverSwaps = swapFieldsForStaticText(coverRoot);
+      // capture a few px wider than the element's own box — scrollWidth
+      // excludes the element's border, so cropping the canvas to exactly
+      // scrollWidth was clipping off the card's right-edge border line
+      const coverCaptureWidth = Math.ceil(coverRoot.getBoundingClientRect().width) + 6;
+      const coverCanvas = await window.html2canvas(coverRoot, {
+        scale: 2, backgroundColor: '#ffffff', useCORS: true,
+        windowWidth: Math.max(coverCaptureWidth, 1600), width: coverCaptureWidth
+      });
+      const coverScaleForRows = coverCanvas.width / coverRoot.getBoundingClientRect().width;
+      const coverRowBoundaries = getRowBoundaries(coverRoot, coverScaleForRows);
+      restoreFieldsFromStaticText(coverSwaps);
+      scheduleEl.style.display = prevScheduleDisplay;
+      renderCanvasToPdf(pdf, coverCanvas, coverRowBoundaries, coverPageW, coverPageH, margin, true, null);
+
+      // ---- capture 2: the schedule table, one page's worth of ROWS at a
+      // time. Earlier versions captured the whole table as one tall image
+      // and sliced it by pixel position afterward — but html2canvas renders
+      // wrapped text through its own internal pipeline, which can come out a
+      // few pixels different from our own DOM measurements, and that was
+      // enough to still slice through a row occasionally. Capturing each
+      // page's rows as their OWN screenshot (every other row hidden) removes
+      // that mismatch entirely: there is nothing to slice, so a row can
+      // never end up split across two pages. The table itself also has a
+      // fixed, narrow width per column now (table-layout: fixed — see the
+      // CSS), so its total width is always the same regardless of screen
+      // size; the card around it still defaults to stretching to fill its
+      // container though, which previously left a blank gutter next to the
+      // table — "hugging" the card to its content with fit-content removes
+      // that ambiguity. ----
+      scheduleEl.style.setProperty('width', 'fit-content', 'important');
+      const otherChildren = Array.from(panel.children).filter(c => c !== scheduleEl);
+      const hiddenPrev = otherChildren.map(c => c.style.display);
+      otherChildren.forEach(c => { c.style.display = 'none'; });
+      const scheduleSwaps = swapFieldsForStaticText(scheduleEl);
+
+      const elementWidthPx = Math.ceil(scheduleEl.getBoundingClientRect().width);
+      const schedPageW = Math.max(Math.round(elementWidthPx * 0.75) + margin * 2, coverPageW);
+      const schedPageH = coverPageH;
+      const schedUsableW = schedPageW - margin * 2;
+      const schedUsableH = schedPageH - margin * 2;
+
+      const tbodyEl = scheduleEl.querySelector('table.schedule tbody');
+      const allRows = Array.from(tbodyEl.querySelectorAll('tr'));
+      // Every page's screenshot includes more than just the rows — the card
+      // title, the table header, and the wrapper's own border/padding are
+      // captured on every page too, at a roughly constant height. The row
+      // budget below has to leave room for that fixed overhead as well,
+      // otherwise a page with fewer/shorter rows can still end up taller
+      // than a full page once that overhead is added back in — and since
+      // it no longer fits at full width, it gets scaled DOWN to fit the
+      // page height instead, which is what "shrinks" that page.
+      const totalRowsHeightPx = allRows.reduce((sum, tr) => sum + tr.getBoundingClientRect().height, 0);
+      const overheadPx = Math.max(0, scheduleEl.getBoundingClientRect().height - totalRowsHeightPx);
+      // A small extra safety margin (4%) absorbs the few-pixel differences
+      // between our own DOM measurements and html2canvas's own rendering.
+      const rowBudgetPx = Math.max(60, (schedUsableH * (elementWidthPx / schedUsableW) - overheadPx) * 0.96);
+      const rowGroups = [];
+      let currentGroup = [];
+      let currentHeight = 0;
+      allRows.forEach(tr => {
+        const h = tr.getBoundingClientRect().height;
+        if (currentGroup.length && currentHeight + h > rowBudgetPx) {
+          rowGroups.push(currentGroup);
+          currentGroup = [];
+          currentHeight = 0;
+        }
+        currentGroup.push(tr);
+        currentHeight += h;
+      });
+      if (currentGroup.length) rowGroups.push(currentGroup);
+
+      for (const group of rowGroups) {
+        const hiddenRows = allRows.filter(tr => !group.includes(tr));
+        hiddenRows.forEach(tr => { tr.dataset.pdfPrevDisplay = tr.style.display; tr.style.display = 'none'; });
+        const scheduleCaptureWidth = Math.ceil(scheduleEl.getBoundingClientRect().width) + 6;
+        const groupCanvas = await window.html2canvas(scheduleEl, {
+          scale: 2, backgroundColor: '#ffffff', useCORS: true,
+          windowWidth: Math.max(scheduleCaptureWidth, 900), width: scheduleCaptureWidth
+        });
+        hiddenRows.forEach(tr => { tr.style.display = tr.dataset.pdfPrevDisplay; delete tr.dataset.pdfPrevDisplay; });
+        addFittedImagePage(pdf, groupCanvas, schedPageW, schedPageH, margin, false, [schedPageW, schedPageH]);
+      }
+
+      restoreFieldsFromStaticText(scheduleSwaps);
+      otherChildren.forEach((c, i) => { c.style.display = hiddenPrev[i]; });
+      scheduleEl.style.removeProperty('width');
+
+      document.body.classList.remove('pdf-export-mode');
+      if (prevTheme) document.documentElement.setAttribute('data-theme', prevTheme);
+      else document.documentElement.removeAttribute('data-theme');
+
+      const blob = pdf.output('blob');
+      const day = getActiveDay();
+      const safeTitle = (state.prodTitle || 'קולשיט').replace(/[^\u0590-\u05FFa-zA-Z0-9]+/g, '_') || 'קולשיט';
+      const safeDay = (day.label || 'יום').replace(/[^\u0590-\u05FFa-zA-Z0-9]+/g, '_');
+      await saveFile({ filename: 'קולשיט_' + safeTitle + '_' + safeDay + '.pdf', data: blob });
+      statusEl.textContent = 'PDF נשמר';
+    } catch (e) {
+      document.body.classList.remove('pdf-export-mode');
+      if (e && e.code === 'declined') { statusEl.textContent = 'בוטל'; return; }
+      console.error('pdf export failed', e);
+      await showAlert('שגיאה בייצוא PDF. אפשר תמיד להשתמש בכפתור ההדפסה ולבחור "שמירה כ-PDF".');
+      statusEl.textContent = 'שגיאה';
+    }
+  }
+
+  /* ---------- Word export: build a real .docx with the active day's data (text only, no photos) ---------- */
+  async function exportWord() {
+    const statusEl = document.getElementById('saveStatus');
+    try {
+      statusEl.textContent = 'מכין Word…';
+
+      await loadScriptOnce('https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js', () => window.docx);
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle, PageOrientation } = window.docx;
+
+      const day = getActiveDay();
+      const times = computeScheduleTimes(day);
+
+      function p(text, opts) {
+        opts = opts || {};
+        return new Paragraph({
+          alignment: AlignmentType.RIGHT,
+          bidirectional: true,
+          heading: opts.heading,
+          spacing: opts.spacing || { after: 100 },
+          pageBreakBefore: !!opts.pageBreakBefore,
+          children: [ new TextRun({ text: text || '', bold: !!opts.bold, size: opts.size || 22 }) ]
+        });
+      }
+      function cell(text, opts) {
+        opts = opts || {};
+        return new TableCell({
+          width: { size: opts.width || 10, type: WidthType.PERCENTAGE },
+          columnSpan: opts.colSpan,
+          shading: opts.shade ? { fill: opts.shade } : undefined,
+          children: [ new Paragraph({
+            alignment: AlignmentType.RIGHT,
+            bidirectional: true,
+            children: [ new TextRun({ text: text || '', bold: !!opts.bold, size: opts.size || 18 }) ]
+          }) ]
+        });
+      }
+      function row(cells) {
+        // The columns above are built right-to-left (first = rightmost, matching
+        // how the schedule reads on screen). Word lays out table columns left-to-right,
+        // so reversing here is what actually puts them in the correct RTL order.
+        return new TableRow({ children: cells.slice().reverse() });
+      }
+      const thinBorders = {
+        top: { style: BorderStyle.SINGLE, size: 2, color: 'CCCCCC' },
+        bottom: { style: BorderStyle.SINGLE, size: 2, color: 'CCCCCC' },
+        left: { style: BorderStyle.SINGLE, size: 2, color: 'CCCCCC' },
+        right: { style: BorderStyle.SINGLE, size: 2, color: 'CCCCCC' },
+        insideHorizontal: { style: BorderStyle.SINGLE, size: 2, color: 'CCCCCC' },
+        insideVertical: { style: BorderStyle.SINGLE, size: 2, color: 'CCCCCC' }
+      };
+
+      const children = [];
+      children.push(p(state.prodTitle || 'שם ההפקה', { heading: HeadingLevel.TITLE, bold: true, size: 40 }));
+      if (state.prodCompany) children.push(p(state.prodCompany, { size: 20 }));
+      children.push(p((day.label || 'יום') + ' מתוך ' + (day.totalDays || '?') + '   ·   תאריך: ' + (day.date || '—'), { bold: true, size: 24 }));
+
+      const creditsLine = state.credits.filter(c => c.role || c.name).map(c => (c.role || '') + ': ' + (c.name || '—')).join('   |   ');
+      if (creditsLine) children.push(p(creditsLine, { size: 18 }));
+
+      children.push(p('קריאה כללית: ' + (day.generalCall || '—') + '   |   שקיעה: ' + (day.sunset || '—') + '   |   זריחה: ' + (day.sunrise || '—') + '   |   סצנות (סה"כ ליום): ' + (day.scenesCount || '—'), { size: 18 }));
+      children.push(p('לוקיישן ראשי: ' + (day.mainLocation || '—') + '   |   חניה: ' + (day.parking || '—'), { size: 18 }));
+      if (day.hospital) children.push(p('בית חולים קרוב: ' + day.hospital, { size: 18 }));
+
+      // Credits, day info, locations and cast all belong on the cover page;
+      // the shooting-schedule table starts fresh on the page(s) after it.
+      children.push(p('שחקנים — קריאה אישית', { heading: HeadingLevel.HEADING_1, bold: true, size: 28, spacing: { before: 300, after: 150 } }));
+      const castHeader = row(['#','שם','תפקיד','קריאה','איסוף'].map(t => cell(t, { bold: true, shade: 'EEEEEE', width: 20 })));
+      const castRows = (day.cast || []).map(c => row([cell(c.num||''), cell(c.name||''), cell(c.role||''), cell(c.call||''), cell(c.pickup||'')]));
+      children.push(new Table({ rows: [castHeader, ...castRows], width: { size: 100, type: WidthType.PERCENTAGE }, borders: thinBorders }));
+
+      children.push(p('לוח צילומים', { heading: HeadingLevel.HEADING_1, bold: true, size: 28, spacing: { before: 300, after: 150 }, pageBreakBefore: true }));
+
+      const headerCells = ['דקות','שעה','סצנה','עמודים','פ/ח','יום/לילה','לוקיישן','תאור הסצנה','שחקנים','ניצבים','ארט','הלבשה','הערות']
+        .map(t => cell(t, { bold: true, shade: 'EEEEEE', width: 8 }));
+      const tableRows = [ row(headerCells) ];
+
+      day.schedule.forEach((item, idx) => {
+        if (item.type === 'break') {
+          tableRows.push(row([
+            cell(item.minutes || '', { width: 8 }),
+            cell(formatComputedRange(times[idx]), { width: 16 }),
+            cell(item.label || '', { colSpan: 11, bold: true, shade: 'F6D9D5' })
+          ]));
+        } else {
+          const actorsTxt = (item.actorsList || []).map((a, i) => (i + 1) + '. ' + (a.name || '')).join(', ');
+          const extrasTxt = (item.extrasList || []).map((x, i) => (i + 1) + '. ' + (x.name || '')).join(', ');
+          tableRows.push(row([
+            cell(item.minutes || ''),
+            cell(formatComputedRange(times[idx])),
+            cell(item.sceneNum || ''),
+            cell(item.pages || ''),
+            cell(item.io || ''),
+            cell(item.dayNight || ''),
+            cell(item.location || ''),
+            cell(item.desc || ''),
+            cell(actorsTxt),
+            cell(extrasTxt),
+            cell(item.art || ''),
+            cell(actorsTxt),
+            cell(item.notes || '')
+          ]));
+        }
+      });
+      children.push(new Table({ rows: tableRows, width: { size: 100, type: WidthType.PERCENTAGE }, borders: thinBorders }));
+
+      if (day.notes) {
+        children.push(p('הערות כלליות', { heading: HeadingLevel.HEADING_1, bold: true, size: 28, spacing: { before: 300, after: 150 } }));
+        children.push(p(day.notes, { size: 20 }));
+      }
+
+      const doc = new Document({
+        sections: [{
+          properties: {
+            page: {
+              size: { orientation: PageOrientation.LANDSCAPE, width: 16838, height: 11906 }, // A4, twips
+              margin: { top: 850, right: 850, bottom: 850, left: 850 } // ~1.5cm on every side
+            }
+          },
+          children
+        }]
+      });
+      const blob = await Packer.toBlob(doc);
+      const safeTitle = (state.prodTitle || 'קולשיט').replace(/[^\u0590-\u05FFa-zA-Z0-9]+/g, '_') || 'קולשיט';
+      const safeDay = (day.label || 'יום').replace(/[^\u0590-\u05FFa-zA-Z0-9]+/g, '_');
+      await saveFile({ filename: 'קולשיט_' + safeTitle + '_' + safeDay + '.docx', data: blob });
+      statusEl.textContent = 'Word נשמר';
+    } catch (e) {
+      if (e && e.code === 'declined') { statusEl.textContent = 'בוטל'; return; }
+      console.error('word export failed', e);
+      await showAlert('שגיאה בייצוא Word.');
+      statusEl.textContent = 'שגיאה';
+    }
+  }
+
+  async function handleImportFile(file) {
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const importedState = parsed && parsed.state ? parsed.state : parsed; // tolerate a raw state.json too
+      if (!importedState || !Array.isArray(importedState.days)) {
+        await showAlert('קובץ הגיבוי לא תקין או לא בפורמט הנכון.');
+        return;
+      }
+      const ok = await showConfirm('טעינת הגיבוי תחליף את כל הנתונים הנוכחיים במערכת (כולל כל הימים). להמשיך?');
+      if (!ok) return;
+
+      Object.keys(state).forEach(k => delete state[k]);
+      Object.assign(state, importedState);
+      if (!state.days || !state.days.length) state.days = [blankDay(1)];
+      if (!state.credits || !state.credits.length) state.credits = defaultRoles.map(blankCredit);
+      state.days.forEach(d => { if (d.schedule) d.schedule.forEach(migrateSceneItem); });
+      if (!state.activeDayId || !state.days.find(d => d.id === state.activeDayId)) state.activeDayId = state.days[0].id;
+
+      if (parsed && parsed.photos) {
+        for (const [k, dataUrl] of Object.entries(parsed.photos)) {
+          await savePhoto(k, dataUrl);
+        }
+      }
+
+      bindTop(); renderCredits(); renderTabs(); renderPanels(); save();
+      await showAlert('הגיבוי נטען בהצלחה.');
+    } catch (e) {
+      console.error('import failed', e);
+      await showAlert('שגיאה בטעינת קובץ הגיבוי. ודאי שזה קובץ JSON שיוצא מהמערכת הזו.');
+    }
+  }
+
+  /* ---------- toolbar ---------- */
+  // The browser's native print/"Save as PDF" shrinks the wide schedule table
+  // to fit one page width, producing tiny, hard-to-read text and no clean
+  // break before the schedule. The PDF export below already solves both
+  // (natural size, paginated, cover page separated from the schedule), so
+  // the print button reuses it instead of window.print().
+  document.getElementById('printBtn').addEventListener('click', exportPDF);
+  document.getElementById('exportPdfBtn').addEventListener('click', exportPDF);
+  document.getElementById('exportWordBtn').addEventListener('click', exportWord);
+  document.getElementById('exportBtn').addEventListener('click', exportBackup);
+  document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFileInput').click());
+  document.getElementById('importFileInput').addEventListener('change', (ev) => {
+    const file = ev.target.files && ev.target.files[0];
+    if (file) handleImportFile(file);
+    ev.target.value = '';
+  });
+
+  async function init() {
+    initEditGate();
+    loadLocal();
+    bindTop();
+    renderCredits();
+    renderTabs();
+    renderPanels();
+    const syncBadgeEl = document.getElementById('syncBadge');
+    if (syncBadgeEl) { syncBadgeEl.style.cursor = 'pointer'; syncBadgeEl.addEventListener('click', retryDbConnection); }
+    await initDb(); // may pull in shared data from other collaborators — re-render if so
+    bindTop();
+    renderCredits();
+    renderTabs();
+    renderPanels();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
+
+</body></html>
